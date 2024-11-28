@@ -16,7 +16,8 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     options.Connect(new Uri(endpoint), azCredentials);
 });
 
-builder.Services.Configure<AppConfig>(builder.Configuration.GetSection("Config"));
+var config = new Config();
+builder.Services.Configure<Config>(builder.Configuration.GetSection("Greenhouse:Config"));
 
 
 var app = builder.Build();
