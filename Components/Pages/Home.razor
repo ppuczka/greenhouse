@@ -1,8 +1,15 @@
 ﻿@page "/"
 @using Greenhouse.Config
+@using Greenhouse.Data
+@using Microsoft.EntityFrameworkCore
 
 @inject Microsoft.Extensions.Options.IOptions<Config> Config    
+@inject IDbContextFactory<MetricsContext> DbFactory
 <PageTitle>Home</PageTitle>
 
 <h1>Application name: @Config.Value.AppName</h1><br>
 <h1>Application version: @Config.Value.AppVersion</h1>
+@{
+    var context = @DbFactory.CreateDbContext();
+    var metric = context.GreenhouseMetrics.FirstAsync().Result;
+}

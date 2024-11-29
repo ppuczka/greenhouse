@@ -1,8 +1,11 @@
 using Azure.Identity;
 using Greenhouse.Components;
 using Greenhouse.Config;
+using Greenhouse.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+var azCredentials = new DefaultAzureCredential();
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -11,14 +14,19 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 {
     var endpoint = builder.Configuration.GetSection("Endpoints:AppConfiguration")
         .Value ?? throw new ArgumentNullException("Endpoints:AppConfiguration");
-    
-    var azCredentials = new DefaultAzureCredential();
+
     options.Connect(new Uri(endpoint), azCredentials);
 });
 
-var config = new Config();
 builder.Services.Configure<Config>(builder.Configuration.GetSection("Greenhouse:Config"));
-
+builder.Services.AddDbContextFactory<MetricsContext>(options =>
+{
+    options.UseCosmos(
+        builder.Configuration.GetSection("Greenhouse:Config:DatabaseEndpoint").Value!,
+        azCredentials,
+        builder.Configuration.GetSection("Greenhouse:Config:DatabaseName").Value!
+        );
+});
 
 var app = builder.Build();
 
