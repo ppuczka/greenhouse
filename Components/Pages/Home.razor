@@ -11,5 +11,8 @@
 <h1>Application version: @Config.Value.AppVersion</h1>
 @{
     var context = @DbFactory.CreateDbContext();
-    var metric = context.GreenhouseMetrics.FirstAsync().Result;
+    var metric = context.GreenhouseMetrics.LastAsync().Result;
 }
+<h6>metric: @metric.Temperature</h6>
+<h6>level: @metric.TemperatureLevel</h6>
+<h6>level: @metric.DateTime</h6>
