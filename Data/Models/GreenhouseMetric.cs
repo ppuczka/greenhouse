@@ -20,14 +20,14 @@ public enum HumidityLevel
 {
     high = 0,
     optimal = 1,
-    low = 2,
+    lo = 2,
 }
 
 public enum TemperatureLevel
 {
     high = 0,
     optimal = 1,
-    low = 2,
+    lo = 2,
 }
 
 public enum SoilMoistureLevel

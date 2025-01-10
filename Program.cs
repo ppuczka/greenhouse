@@ -2,6 +2,8 @@ using Azure.Identity;
 using Greenhouse.Components;
 using Greenhouse.Config;
 using Greenhouse.Data;
+using Greenhouse.Data.Interfaces;
+using Greenhouse.Data.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +30,9 @@ builder.Services.AddDbContextFactory<MetricsContext>(options =>
         );
 });
 
+builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
+builder.Services.AddControllersWithViews();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -43,7 +48,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();

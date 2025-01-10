@@ -1,0 +1,55 @@
+@page "/metrics"
+@using Greenhouse.Data
+@using Greenhouse.Data.Interfaces
+@using Greenhouse.Data.Services
+
+@inject IGreenhouseMetricService GreenhouseMetricService
+
+<PageTitle>Greenhouse Metrics</PageTitle>
+
+<h1>Metrics</h1>
+
+<p>Latest Greenhouse metrics</p>
+
+@if (_metricsList == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Date and time</th>
+            <th>Temperature (C)</th>
+            <th>Humidity (%)</th>
+            <th>Humidity level</th>
+            <th>Soil moisture</th>
+            <th>Soil moisture level</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var metric in _metricsList)
+        {
+            <tr>
+                <td>@metric.DateTime</td>
+                <td>@metric.Temperature</td>
+                <td>@metric.Humidity</td>
+                <td>@metric.HumidityLevel</td>
+                <td>@metric.SoilMoisture</td>
+                <td>@metric.SoilMoistureLevel</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code
+{
+    private List<GreenhouseMetric>? _metricsList;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        _metricsList = await GreenhouseMetricService.GetGreenhouseMetrics();
+    }
+}
