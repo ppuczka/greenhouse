@@ -24,7 +24,11 @@ jobs:
       - name: Determine Version
         id: set_build_number
         uses: gittools/actions/gitversion/execute@v3.1.1
-  
+     
+      - run: |
+          echo "New build number: ${{ steps.set_build_number.outputs.fullSemVer }}"
+          name: Show build number 
+      
   build_and_deploy_docker_container:
     runs-on: ubuntu-latest
     needs: add_build_version
@@ -32,8 +36,8 @@ jobs:
       fullSemVer: ${{ needs.add_build_version.outputs.fullSemVer }}
     steps:
       - run: |
-          echo "FullSemVer ${{ needs.add_build_version.outputs.fullSemVer }}"
-        name: Display GitVersion outputs (step output with prefix)
+          echo "Current build version ${{ needs.add_build_version.outputs.fullSemVer }}"
+        name: Show build number
       
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -55,7 +59,7 @@ jobs:
           push: true
           file: ./Dockerfile
           tags: |
-            greenhouseregistry.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.add_build_version.outputs.fullSemVer }}
+            greenhouseregistry.azurecr.io/${{ env.IMAGE_NAME }}:${{ needs.add_build_version.outputs.fullSemVer }}
       # - name: 'Login via Azure CLI'
       #   uses: azure/login@v1
       #     with:
