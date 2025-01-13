@@ -1,4 +1,4 @@
-name: ci
+name: Deploy docker container
 
 on:
   workflow_dispatch:
@@ -10,6 +10,20 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.1
+        with:
+          versionSpec: '6.0.x'     
+
+      - name: Determine Version
+        id: version_step
+        uses: gittools/actions/gitversion/execute@v3.1.1
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       
@@ -19,8 +33,8 @@ jobs:
       - name: Login to Container Registry
         uses: docker/login-action@v3
         with:
-          registry: prpucontainerregistry.azurecr.io
-          username: PRPUContainerRegistry
+          registry: greenhouseregistry.azurecr.io
+          username: greenhouseRegistry
           password: ${{ secrets.AZ_CONTAINER_REGISTRY_TOKEN }}
       
       - name: Build and push
@@ -28,7 +42,7 @@ jobs:
         with:
           platforms: linux/amd64
           push: true
-          file: ./AiBlazorApp/Dockerfile
+          file: ./Greenhouse/Dockerfile
           tags: |
             prpucontainerregistry.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
       # - name: 'Login via Azure CLI'
