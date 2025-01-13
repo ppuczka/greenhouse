@@ -32,7 +32,7 @@ jobs:
       fullSemVer: ${{ needs.add_build_version.outputs.fullSemVer }}
     steps:
       - run: |
-          echo "FullSemVer $env:fullSemVer"
+          echo "FullSemVer ${{ needs.add_build_version.outputs.fullSemVer }}"
         name: Display GitVersion outputs (step output with prefix)
       
       - name: Set up QEMU
