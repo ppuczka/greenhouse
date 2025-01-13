@@ -8,6 +8,8 @@ env:
 
 jobs:
   add_build_version:
+    outputs:
+      fullSemVer: ${{ steps.step_build_number.outputs.fullSemVer }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,12 +22,16 @@ jobs:
           versionSpec: '6.0.x'     
 
       - name: Determine Version
-        id: version_step
+        id: set_build_number
         uses: gittools/actions/gitversion/execute@v3.1.1
   
   build_and_deploy_docker_container:
     runs-on: ubuntu-latest
     steps:
+      - run: |
+          echo "FullSemVer ${{ steps.add_build_version.outputs.fullSemVer }}"
+        name: Display GitVersion outputs (step output with prefix)
+      
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       
@@ -46,7 +52,7 @@ jobs:
           push: true
           file: ./Dockerfile
           tags: |
-            prpucontainerregistry.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            greenhouseregistry.azurecr.io/${{ env.IMAGE_NAME }}:${{ steps.add_build_version.outputs.fullSemVer }}
       # - name: 'Login via Azure CLI'
       #   uses: azure/login@v1
       #     with:
