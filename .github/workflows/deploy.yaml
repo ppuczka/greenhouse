@@ -27,7 +27,7 @@ jobs:
      
       - run: |
           echo "New build number: ${{ steps.set_build_number.outputs.fullSemVer }}"
-          name: Show build number 
+        name: Show build number 
       
   build_and_deploy_docker_container:
     runs-on: ubuntu-latest
