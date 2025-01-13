@@ -7,10 +7,9 @@ env:
   IMAGE_NAME: greenhouse
 
 jobs:
-  docker:
+  add_build_version:
     runs-on: ubuntu-latest
     steps:
-      
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -23,7 +22,10 @@ jobs:
       - name: Determine Version
         id: version_step
         uses: gittools/actions/gitversion/execute@v3.1.1
-
+  
+  build_and_deploy_docker_container:
+    runs-on: ubuntu-latest
+    steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       
@@ -42,7 +44,7 @@ jobs:
         with:
           platforms: linux/amd64
           push: true
-          file: ./Greenhouse/Dockerfile
+          file: ./Dockerfile
           tags: |
             prpucontainerregistry.azurecr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
       # - name: 'Login via Azure CLI'
