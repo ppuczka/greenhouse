@@ -6,8 +6,14 @@ using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Services;
 using Microsoft.EntityFrameworkCore;
 
+var userAssignedClientId = Environment.GetEnvironmentVariable("CLIENT_ID");
+var azCredentials = new DefaultAzureCredential(
+    new DefaultAzureCredentialOptions()
+    {
+        ManagedIdentityClientId = userAssignedClientId
+    });
+
 var builder = WebApplication.CreateBuilder(args);
-var azCredentials = new DefaultAzureCredential();
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
