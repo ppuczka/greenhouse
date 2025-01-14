@@ -14,10 +14,8 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
-    var endpoint = builder.Configuration.GetSection("Endpoints:AppConfiguration")
-        .Value ?? throw new ArgumentNullException("Endpoints:AppConfiguration");
-
-    options.Connect(new Uri(endpoint), azCredentials);
+    var endpoint = Environment.GetEnvironmentVariable("APP_CONFIGURATION_ENDPOINT");
+    options.Connect(new Uri(endpoint ?? string.Empty), azCredentials);
 });
 
 builder.Services.Configure<Config>(builder.Configuration.GetSection("Greenhouse:Config"));
