@@ -26,6 +26,7 @@ else
             <th>Humidity level</th>
             <th>Soil moisture</th>
             <th>Soil moisture level</th>
+            <th>Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -38,6 +39,10 @@ else
                 <td>@metric.HumidityLevel</td>
                 <td>@metric.SoilMoisture</td>
                 <td>@metric.SoilMoistureLevel</td>
+                <td>
+                    <button class="btn btn-primary btn-sm">Add comment</button>
+                    <button class="btn btn-danger btn-sm">Delete</button>
+                </td>
             </tr>
         }
         </tbody>
