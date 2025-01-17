@@ -1,11 +1,8 @@
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-
-namespace Greenhouse.Data;
+namespace Greenhouse.Data.Models;
 
 public class GreenhouseMetric
 {
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public int Temperature { get; set; }
     public int Humidity { get; set; }
     public int SoilMoisture { get; set; }

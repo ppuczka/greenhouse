@@ -1,8 +1,7 @@
 using System.Diagnostics;
-using Azure.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Greenhouse.Data;
+namespace Greenhouse.Data.Models;
 
 public class MetricsContext : DbContext
 {
@@ -15,7 +14,8 @@ public class MetricsContext : DbContext
     {
         modelBuilder.HasDefaultContainer("greenhouse");
         modelBuilder.Entity<GreenhouseMetric>().HasNoDiscriminator();
-
+        
+        modelBuilder.Entity<GreenhouseMetric>().Property(g => g.Id).ToJsonProperty("id");
         modelBuilder.Entity<GreenhouseMetric>().Property(g => g.Humidity).ToJsonProperty("humidity");
         modelBuilder
             .Entity<GreenhouseMetric>()

@@ -3,6 +3,7 @@ using Greenhouse.Components;
 using Greenhouse.Config;
 using Greenhouse.Data;
 using Greenhouse.Data.Interfaces;
+using Greenhouse.Data.Models;
 using Greenhouse.Data.Services;
 using Microsoft.EntityFrameworkCore;
 

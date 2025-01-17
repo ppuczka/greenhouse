@@ -1,7 +1,10 @@
 @page "/metrics"
 @using Greenhouse.Data
 @using Greenhouse.Data.Interfaces
+@using Greenhouse.Data.Models
 @using Greenhouse.Data.Services
+
+@rendermode InteractiveServer
 
 @inject IGreenhouseMetricService GreenhouseMetricService
 
@@ -40,8 +43,8 @@ else
                 <td>@metric.SoilMoisture</td>
                 <td>@metric.SoilMoistureLevel</td>
                 <td>
-                    <button class="btn btn-primary btn-sm">Add comment</button>
-                    <button class="btn btn-danger btn-sm">Delete</button>
+                    @* <button class="btn btn-primary btn-sm" @onclick="AddComment">Add comment</button> *@
+                    <button class="btn btn-danger btn-sm" @onclick="() => OnDeleteClick(metric.Id)">Delete</button>
                 </td>
             </tr>
         }
@@ -52,9 +55,22 @@ else
 @code
 {
     private List<GreenhouseMetric>? _metricsList;
-    
+
     protected override async Task OnInitializedAsync()
     {
-        _metricsList = await GreenhouseMetricService.GetGreenhouseMetrics();
+        await LoadMetrics();
     }
+
+    private async Task LoadMetrics()
+    {
+        _metricsList = await GreenhouseMetricService.GetGreenhouseMetrics();
+    } 
+    
+    private async Task OnDeleteClick(string toDelete)
+    { 
+        await GreenhouseMetricService.DeleteMetric(toDelete);
+        await LoadMetrics();
+    }
+    
+    private Task AddComment(GreenhouseMetric updateMetrics) { throw new NotImplementedException(); }
 }
