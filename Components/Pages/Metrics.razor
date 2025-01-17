@@ -32,10 +32,9 @@ else
             <th>Actions</th>
         </tr>
         </thead>
-        <tbody>
-        @foreach (var metric in _metricsList)
+        <tbody> @foreach (var metric in _metricsList)
         {
-            <tr>
+            <tr @onclick="() => ToggleRow(metric)">
                 <td>@metric.DateTime</td>
                 <td>@metric.Temperature</td>
                 <td>@metric.Humidity</td>
@@ -44,15 +43,25 @@ else
                 <td>@metric.SoilMoistureLevel</td>
                 <td>
                     @* <button class="btn btn-primary btn-sm" @onclick="AddComment">Add comment</button> *@
-                    <button class="btn btn-danger btn-sm" @onclick="() => OnDeleteClick(metric.Id)">Delete</button>
+                    <button class="btn btn-danger btn-sm" @onclick="(e) => OnDeleteClick(metric.Id)">Delete</button>
                 </td>
-            </tr>
+            </tr> @if (metric.IsExpanded)
+            {
+                <tr>
+                    <td colspan="7">
+                        <div class="alert alert-info"> Tadaaa</div>
+                    </td>
+                </tr>
+            }
         }
         </tbody>
     </table>
 }
 
 @code
+
+
+
 {
     private List<GreenhouseMetric>? _metricsList;
 
@@ -64,13 +73,21 @@ else
     private async Task LoadMetrics()
     {
         _metricsList = await GreenhouseMetricService.GetGreenhouseMetrics();
-    } 
-    
-    private async Task OnDeleteClick(string toDelete)
-    { 
+    }
+
+    private async Task OnDeleteClick(string toDelete) { 
+        // e.StopPropagation(); 
         await GreenhouseMetricService.DeleteMetric(toDelete);
         await LoadMetrics();
     }
-    
-    private Task AddComment(GreenhouseMetric updateMetrics) { throw new NotImplementedException(); }
+
+    private void ToggleRow(GreenhouseMetric metric)
+    {
+        metric.IsExpanded = !metric.IsExpanded;
+    }
+
+    private Task AddComment(GreenhouseMetric updateMetrics)
+    {
+        throw new NotImplementedException();
+    }
 }
