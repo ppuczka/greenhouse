@@ -1,7 +1,14 @@
+using Newtonsoft.Json;
+
 namespace Greenhouse.Data.Models;
 
 public class MetricComment
 {
+    [JsonProperty("comment")]
     public string Comment { get; set; } = string.Empty;
-    public DateTime DateTime { get; set; }
+    
+    [JsonProperty("created")]
+    public DateTime Created { get; set; }
 }
+
+

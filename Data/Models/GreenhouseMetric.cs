@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 namespace Greenhouse.Data.Models;
 
@@ -11,7 +12,9 @@ public class GreenhouseMetric
     public HumidityLevel HumidityLevel { get; set; }
     public TemperatureLevel TemperatureLevel { get; set; }
     public SoilMoistureLevel SoilMoistureLevel { get; set; }
-    public List<MetricComment>? Comments { get; set; }
+    
+    [JsonProperty("comment")]
+    public string Comment { get; set; }
     public DateTime DateTime { get; set; }
     
     [NotMapped]
