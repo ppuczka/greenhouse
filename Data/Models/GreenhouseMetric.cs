@@ -17,6 +17,9 @@ public class GreenhouseMetric
     
     [NotMapped]
     public bool IsExpanded { get; set; }
+    
+    [NotMapped]
+    public bool IsCommentFieldVisible { get; set; }
 }
 
 public enum HumidityLevel

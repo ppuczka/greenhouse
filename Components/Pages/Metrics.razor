@@ -62,6 +62,17 @@ else
                             {
                                 <p>No comments added yet</p>
                             }
+                            <button class="btn btn-primary btn-sm add-comment-btn" @onclick="() => ToggleCommentField(metric)">Add Comment
+                            </button>
+                            @if (metric.IsCommentFieldVisible)
+                            {
+                                <div class="form-group mt-2">
+                                    <input type="text" class="form-control" placeholder="Enter your comment"/>
+                                    <button class="btn btn-success btn-sm mt-1" @onclick="() => AddComment(metric.Id)">
+                                        Submit
+                                    </button>
+                                </div>
+                            }
                         </div>
                     </td>
                 </tr>
@@ -72,6 +83,7 @@ else
 }
 
 @code
+
 {
     private List<GreenhouseMetric>? _metricsList;
 
@@ -91,14 +103,21 @@ else
         await GreenhouseMetricService.DeleteMetric(toDelete);
         await LoadMetrics();
     }
+    
+    private Task AddComment(string metricId)
+    {
+        throw new NotImplementedException();
+    }
 
     private void ToggleRow(GreenhouseMetric metric)
     {
         metric.IsExpanded = !metric.IsExpanded;
     }
-
-    private Task AddComment(GreenhouseMetric updateMetrics)
+    
+    private void ToggleCommentField(GreenhouseMetric metric)
     {
-        throw new NotImplementedException();
+        metric.IsCommentFieldVisible = !metric.IsCommentFieldVisible;
     }
+
+    
 }
