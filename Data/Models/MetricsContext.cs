@@ -49,12 +49,13 @@ public class MetricsContext : DbContext
 
         modelBuilder.Entity<GreenhouseMetric>().Property(g => g.DateTime).ToJsonProperty("date_time");
 
-        // modelBuilder.Entity<GreenhouseMetric>()
-        //     .Property(g => g.MetricComment)
-        //     .HasConversion(
-        //         v => JsonConvert.SerializeObject(v, Formatting.Indented),
-        //         v => JsonConvert.DeserializeObject<MetricComment>(v)).ToJsonProperty("comments");
-
-        modelBuilder.Entity<GreenhouseMetric>().Property(g => g.Comment).ToJsonProperty("comment");
+        modelBuilder.Entity<GreenhouseMetric>().OwnsMany(
+            o => o.Comments,
+            comment =>
+            {
+                comment.ToJsonProperty("comments");
+                comment.Property(p => p.Comment).ToJsonProperty("comment");
+                comment.Property(p => p.Created).ToJsonProperty("created");
+            });
     }
 }

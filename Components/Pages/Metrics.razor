@@ -1,8 +1,6 @@
 @page "/metrics"
-@using Greenhouse.Data
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
-@using Greenhouse.Data.Services
 
 @rendermode InteractiveServer
 
@@ -10,9 +8,7 @@
 
 <PageTitle>Greenhouse Metrics</PageTitle>
 
-<h1>Metrics</h1>
-
-<p>Latest Greenhouse metrics</p>
+<h2>Metrics</h2>
 
 @if (_metricsList == null)
 {
@@ -49,7 +45,24 @@ else
             {
                 <tr>
                     <td colspan="7">
-                        <div class="alert alert-info"> Tadaaa</div>
+                        <div class="alert alert-dark">
+                            @if (metric.Comments.Count > 0)
+                            {
+                                <h5>Comments:</h5>
+                                <ul>
+                                    @foreach (var comment in @metric.Comments)
+                                    {
+                                        <li>
+                                            <span> <b>Date created:</b> @comment.Created <b>Text:</b> @comment.Comment</span>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            else
+                            {
+                                <p>No comments added yet</p>
+                            }
+                        </div>
                     </td>
                 </tr>
             }
@@ -59,9 +72,6 @@ else
 }
 
 @code
-
-
-
 {
     private List<GreenhouseMetric>? _metricsList;
 
@@ -75,7 +85,8 @@ else
         _metricsList = await GreenhouseMetricService.GetGreenhouseMetrics();
     }
 
-    private async Task OnDeleteClick(string toDelete) { 
+    private async Task OnDeleteClick(string toDelete)
+    {
         // e.StopPropagation(); 
         await GreenhouseMetricService.DeleteMetric(toDelete);
         await LoadMetrics();

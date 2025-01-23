@@ -12,9 +12,7 @@ public class GreenhouseMetric
     public HumidityLevel HumidityLevel { get; set; }
     public TemperatureLevel TemperatureLevel { get; set; }
     public SoilMoistureLevel SoilMoistureLevel { get; set; }
-    
-    [JsonProperty("comment")]
-    public string Comment { get; set; }
+    public ICollection<MetricComment> Comments { get; set; }
     public DateTime DateTime { get; set; }
     
     [NotMapped]

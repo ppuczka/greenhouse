@@ -1,21 +1,38 @@
 ﻿@page "/"
 @using Greenhouse.Config
 @using Greenhouse.Data
+@using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
 @using Microsoft.EntityFrameworkCore
 
-@inject Microsoft.Extensions.Options.IOptions<Config> Config    
+@inject Microsoft.Extensions.Options.IOptions<Config> Config
 @inject IDbContextFactory<MetricsContext> DbFactory
-<PageTitle>Home</PageTitle>
+@inject IGreenhouseMetricService GreenhouseMetricService
 
-<h1>Application name: @Config.Value.AppName</h1><br>
-<h1>Application version: @Config.Value.AppVersion</h1>
-@{
-    var context = @DbFactory.CreateDbContext();
-    var metric = context.GreenhouseMetrics.LastAsync().Result;
+<PageTitle>Dashboard</PageTitle>
+@if (_metric == null)
+{
+    <p><em>Loading...</em></p>
 }
-<h6>metric: @metric.Temperature</h6>
-<h6>level: @metric.TemperatureLevel</h6>
-<h6>level: @metric.DateTime</h6>
-<h6>level: @metric.Comment</h6>
+else
+{
+    <h1>Dashboard</h1>
+    <br>
+    <br/>
+    <h4>Live metrics</h4>
+    <h6>Last updated: <b>@_metric.DateTime</b></h6>
+    <h6>Temperature: <b>@_metric.Temperature</b></h6>
+    <h6>Humidity: <b>@_metric.Humidity</b></h6>
+    <h6>Soil Moisture: <b>@_metric.SoilMoisture</b></h6>
+}
 
+@code
+
+{
+    private GreenhouseMetric? _metric;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _metric = await GreenhouseMetricService.GetLatestMetric();
+    }
+}
