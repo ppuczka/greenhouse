@@ -70,9 +70,9 @@ else
                             @if (metric.IsCommentFieldVisible)
                             {
                                 <div class="form-group mt-2 comment-form">
-                                    <input type="text" class="form-control" placeholder="Enter your comment"/>
+                                    <input type="text" class="form-control" placeholder="Enter your comment" @bind="NewCommentText" />
                                     <button class="btn btn-success btn-sm" @onclick="() => AddComment(metric.Id)">
-                                        Submit
+                                        Add comment
                                     </button>
                                 </div>
                             }
@@ -89,7 +89,8 @@ else
 
 {
     private List<GreenhouseMetric>? _metricsList;
-
+    public required string NewCommentText; 
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadMetrics();
@@ -107,9 +108,11 @@ else
         await LoadMetrics();
     }
 
-    private Task AddComment(string metricId)
+    private async Task AddComment(string metricId)
     {
-        throw new NotImplementedException();
+        await GreenhouseMetricService.AddComment(metricId, NewCommentText);
+        NewCommentText = string.Empty;
+        await LoadMetrics();
     }
 
     private void ToggleRow(GreenhouseMetric metric)

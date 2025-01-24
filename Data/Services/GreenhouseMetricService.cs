@@ -22,12 +22,12 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         return await context.GreenhouseMetrics.FirstAsync();
     }
 
-    public async Task DeleteMetric(string id)
+    public async Task DeleteMetric(string metricId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         try
         {
-            var toDeleteMetric = await context.GreenhouseMetrics.FindAsync(id);
+            var toDeleteMetric = await context.GreenhouseMetrics.FindAsync(metricId);
             if (toDeleteMetric != null)
             {
                 context.GreenhouseMetrics.Remove(toDeleteMetric);
@@ -46,8 +46,25 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         throw new NotImplementedException();
     }
 
-    public Task AddComment(Guid id, string comment)
+    public async Task AddComment(string metricId, string commentText)
     {
-        throw new NotImplementedException();
+        var comment = new MetricComment(commentText);
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        try
+        {
+            var metric = await context.GreenhouseMetrics.FindAsync(metricId);
+            if (metric != null)
+            {
+                metric.Comments.Add(comment);
+                await context.SaveChangesAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+        
     }
 }

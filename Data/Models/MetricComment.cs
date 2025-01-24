@@ -4,8 +4,14 @@ namespace Greenhouse.Data.Models;
 
 public class MetricComment
 {
-    public string Comment { get; set; } = string.Empty;
-    public DateTime Created { get; set; }
+    public string Comment { get; set; }
+    public DateTime Created { get; set; } = DateTime.UtcNow;
+    
+    public MetricComment(string comment)
+    {
+        Comment = comment;
+    }
+
 }
 
 
