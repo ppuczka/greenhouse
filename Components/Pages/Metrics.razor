@@ -12,7 +12,9 @@
 
 @if (_metricsList == null)
 {
-    <p><em>Loading...</em></p>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+    </div>
 }
 else
 {
@@ -82,24 +84,6 @@ else
         </tbody>
     </table>
 }
-
-<style>
-    .alert-dark {
-        position: relative;
-    }
-    .comment-form {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-    }
-    .comment-form .form-control {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-    .submit-btn {
-        align-self: flex-end;
-    }
-</style>
 
 @code
 
