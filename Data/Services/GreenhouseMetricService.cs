@@ -11,7 +11,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var sortedMetrics = context.GreenhouseMetrics.OrderByDescending(
             item => item.DateTime);
-        return await context.GreenhouseMetrics.ToListAsync();
+        return await sortedMetrics.ToListAsync();
     }
 
     public async Task<GreenhouseMetric> GetLatestMetric()
@@ -19,7 +19,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var sortedMetrics = context.GreenhouseMetrics.OrderByDescending(
             item => item.DateTime);
-        return await context.GreenhouseMetrics.FirstAsync();
+        return await sortedMetrics.FirstAsync();
     }
 
     public async Task DeleteMetric(string metricId)
