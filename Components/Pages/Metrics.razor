@@ -62,13 +62,14 @@ else
                             {
                                 <p>No comments added yet</p>
                             }
-                            <button class="btn btn-primary btn-sm add-comment-btn" @onclick="() => ToggleCommentField(metric)">Add Comment
+                            <button class="btn btn-primary btn-sm add-comment-btn"
+                                    @onclick="() => ToggleCommentField(metric)">Add Comment
                             </button>
                             @if (metric.IsCommentFieldVisible)
                             {
-                                <div class="form-group mt-2">
+                                <div class="form-group mt-2 comment-form">
                                     <input type="text" class="form-control" placeholder="Enter your comment"/>
-                                    <button class="btn btn-success btn-sm mt-1" @onclick="() => AddComment(metric.Id)">
+                                    <button class="btn btn-success btn-sm" @onclick="() => AddComment(metric.Id)">
                                         Submit
                                     </button>
                                 </div>
@@ -81,6 +82,24 @@ else
         </tbody>
     </table>
 }
+
+<style>
+    .alert-dark {
+        position: relative;
+    }
+    .comment-form {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+    .comment-form .form-control {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    .submit-btn {
+        align-self: flex-end;
+    }
+</style>
 
 @code
 
@@ -103,7 +122,7 @@ else
         await GreenhouseMetricService.DeleteMetric(toDelete);
         await LoadMetrics();
     }
-    
+
     private Task AddComment(string metricId)
     {
         throw new NotImplementedException();
@@ -113,11 +132,9 @@ else
     {
         metric.IsExpanded = !metric.IsExpanded;
     }
-    
+
     private void ToggleCommentField(GreenhouseMetric metric)
     {
         metric.IsCommentFieldVisible = !metric.IsCommentFieldVisible;
     }
-
-    
 }
