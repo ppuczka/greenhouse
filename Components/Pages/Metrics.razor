@@ -1,6 +1,11 @@
 @page "/metrics"
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Grids.Internal
+@using Syncfusion.Blazor.Navigations
 
 @rendermode InteractiveServer
 
@@ -18,77 +23,136 @@
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Date and time</th>
-            <th>Temperature (C)</th>
-            <th>Humidity (%)</th>
-            <th>Humidity level</th>
-            <th>Soil moisture</th>
-            <th>Soil moisture level</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody> @foreach (var metric in _metricsList)
-        {
-            <tr @onclick="() => ToggleRow(metric)">
-                <td>@metric.DateTime</td>
-                <td>@metric.Temperature</td>
-                <td>@metric.Humidity</td>
-                <td>@metric.HumidityLevel</td>
-                <td>@metric.SoilMoisture</td>
-                <td>@metric.SoilMoistureLevel</td>
-                <td>
-                    @* <button class="btn btn-primary btn-sm" @onclick="AddComment">Add comment</button> *@
-                    <button class="btn btn-danger btn-sm" @onclick="(e) => OnDeleteClick(metric.Id)">Delete</button>
-                </td>
-            </tr> @if (metric.IsExpanded)
-            {
-                <tr>
-                    <td colspan="7">
-                        <div class="alert alert-dark">
-                            @if (metric.Comments.Count > 0)
-                            {
-                                <h5>Comments:</h5>
-                                <ul>
-                                    @foreach (var comment in @metric.Comments)
-                                    {
-                                        <li>
-                                            <span> <b>Date created:</b> @comment.Created <b>Text:</b> @comment.Comment</span>
-                                        </li>
-                                    }
-                                </ul>
-                            }
-                            else
-                            {
-                                <p>No comments added yet</p>
-                            }
-                            <button class="btn btn-primary btn-sm add-comment-btn"
-                                    @onclick="() => ToggleCommentField(metric)">Add Comment
-                            </button>
-                            @if (metric.IsCommentFieldVisible)
-                            {
-                                <div class="form-group mt-2 comment-form">
-                                    <input type="text" class="form-control" placeholder="Enter your comment" @bind="NewCommentText" />
-                                    <button class="btn btn-success btn-sm" @onclick="() => AddComment(metric.Id)">
-                                        Add comment
-                                    </button>
-                                </div>
-                            }
-                        </div>
-                    </td>
-                </tr>
-            }
-        }
-        </tbody>
-    </table>
+    @* <table class="table"> *@
+    @*     <thead> *@
+    @*     <tr> *@
+    @*         <th>Date and time</th> *@
+    @*         <th>Temperature (C)</th> *@
+    @*         <th>Humidity (%)</th> *@
+    @*         <th>Humidity level</th> *@
+    @*         <th>Soil moisture</th> *@
+    @*         <th>Soil moisture level</th> *@
+    @*         <th>Actions</th> *@
+    @*     </tr> *@
+    @*     </thead> *@
+    @*     <tbody> @foreach (var metric in _metricsList) *@
+    @*     { *@
+    @*         <tr @onclick="() => ToggleRow(metric)"> *@
+    @*             <td>@metric.DateTime</td> *@
+    @*             <td>@metric.Temperature</td> *@
+    @*             <td>@metric.Humidity</td> *@
+    @*             <td>@metric.HumidityLevel</td> *@
+    @*             <td>@metric.SoilMoisture</td> *@
+    @*             <td>@metric.SoilMoistureLevel</td> *@
+    @*             <td> *@
+    @*                 $1$ <button class="btn btn-primary btn-sm" @onclick="AddComment">Add comment</button> #1# *@
+    @*                 <button class="btn btn-danger btn-sm" @onclick="(e) => OnDeleteClick(metric.Id)">Delete</button> *@
+    @*             </td> *@
+    @*         </tr> @if (metric.IsExpanded) *@
+    @*         { *@
+    @*             <tr> *@
+    @*                 <td colspan="7"> *@
+    @*                     <div class="alert alert-dark"> *@
+    @*                         @if (metric.Comments.Count > 0) *@
+    @*                         { *@
+    @*                             <h5>Comments:</h5> *@
+    @*                             <ul> *@
+    @*                                 @foreach (var comment in @metric.Comments) *@
+    @*                                 { *@
+    @*                                     <li> *@
+    @*                                         <span> <b>Date created:</b> @comment.Created <b>Text:</b> @comment.Comment</span> *@
+    @*                                     </li> *@
+    @*                                 } *@
+    @*                             </ul> *@
+    @*                         } *@
+    @*                         else *@
+    @*                         { *@
+    @*                             <p>No comments added yet</p> *@
+    @*                         } *@
+    @*                         <button class="btn btn-primary btn-sm add-comment-btn" *@
+    @*                                 @onclick="() => ToggleCommentField(metric)">Add Comment *@
+    @*                         </button> *@
+    @*                         @if (metric.IsCommentFieldVisible) *@
+    @*                         { *@
+    @*                             <div class="form-group mt-2 comment-form"> *@
+    @*                                 <input type="text" class="form-control" placeholder="Enter your comment" @bind="NewCommentText" /> *@
+    @*                                 <button class="btn btn-success btn-sm" @onclick="() => AddComment(metric.Id)"> *@
+    @*                                     Add comment *@
+    @*                                 </button> *@
+    @*                             </div> *@
+    @*                         } *@
+    @*                     </div> *@
+    @*                 </td> *@
+    @*             </tr> *@
+    @*         } *@
+    @*     } *@
+    @*     </tbody> *@
+    @* </table> *@
+    <SfGrid DataSource="@_metricsList" AllowFiltering="true" AllowSorting="true" AllowPaging="true" AllowGrouping="true" AllowSelection="true" CssClass="full-page-grid">
+        <GridPageSettings PageSize="20"></GridPageSettings>
+        <GridColumns>
+            <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date" Format="dd/MM/yyyy HH:mm:ss"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.Temperature) HeaderText="Temperature" Type="ColumnType.Double"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.Humidity) HeaderText="Humidity" Type="ColumnType.Double"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.HumidityLevel) HeaderText="Humidity Level"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoisture) HeaderText="Soil Moisture" Type="ColumnType.Double"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel) HeaderText="Soil Moisture Level"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel) HeaderText="Soil Moisture Level"></GridColumn>
+            <GridColumn HeaderText="Actions" AllowFiltering="false" AllowSorting="false">
+                <Template>
+                    <SfButton CssClass="e-danger" >Delete</SfButton>
+                </Template>
+            </GridColumn>
+        </GridColumns>
+        <GridTemplates>
+            <RowTemplate Context="com">
+                <div style="padding:20px">
+                    <SfTab>
+                        <TabItems>
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Details"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                </ContentTemplate>
+                            </TabItem>
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Comments"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <SfGrid DataSource="[com]" AllowPaging="true">
+                                        <GridPageSettings PageSize="6"></GridPageSettings>
+                                        <GridColumns>
+                                            <GridColumn Field=@nameof(MetricComment.Created) HeaderText="Order ID" TextAlign="TextAlign.Right" Width="110"> </GridColumn>
+                                            <GridColumn Field=@nameof(MetricComment.Comment) HeaderText="Customer ID" Width="110"></GridColumn>
+                                        </GridColumns>
+                                    </SfGrid>
+                                </ContentTemplate>
+                            </TabItem>
+                            <TabItem>
+                                <ChildContent>
+                                    <TabHeader Text="Tags"></TabHeader>
+                                </ChildContent>
+                                <ContentTemplate>
+                                    <div style="padding-top: 35px; padding-left:20px;">
+                                    </div>
+                                </ContentTemplate>
+                            </TabItem>
+                        </TabItems>
+                    </SfTab>
+                </div>
+            </RowTemplate>
+        </GridTemplates>
+    </SfGrid>
 }
 
 @code
 
 {
     private List<GreenhouseMetric>? _metricsList;
+    private List<MetricComment> _comments { get; set; }
+    
     public required string NewCommentText; 
     
     protected override async Task OnInitializedAsync()

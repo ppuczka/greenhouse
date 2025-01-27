@@ -6,6 +6,7 @@ using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Greenhouse.Data.Services;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Blazor;
 
 var userAssignedClientId = Environment.GetEnvironmentVariable("CLIENT_ID");
 var azCredentials = new DefaultAzureCredential(
@@ -41,8 +42,11 @@ builder.Services.AddDbContextFactory<MetricsContext>(options =>
 
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddSyncfusionBlazor();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

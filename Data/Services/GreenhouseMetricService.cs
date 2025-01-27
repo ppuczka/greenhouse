@@ -10,7 +10,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var sortedMetrics = context.GreenhouseMetrics.OrderByDescending(
-            item => item.DateTime);
+            item => item.DateTime).Take(500);
         return await sortedMetrics.ToListAsync();
     }
 
