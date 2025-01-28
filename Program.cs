@@ -8,6 +8,7 @@ using Greenhouse.Data.Services;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.Blazor;
 
+// Get Azure credentials
 var userAssignedClientId = Environment.GetEnvironmentVariable("CLIENT_ID");
 var azCredentials = new DefaultAzureCredential(
     new DefaultAzureCredentialOptions()
@@ -17,9 +18,7 @@ var azCredentials = new DefaultAzureCredential(
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-
+// Get Application config
 builder.Configuration.AddAzureAppConfiguration(options =>
 {
     var endpoint = Environment.GetEnvironmentVariable("APP_CONFIGURATION_ENDPOINT");
@@ -31,6 +30,8 @@ builder.Configuration.AddAzureAppConfiguration(options =>
 });
 
 builder.Services.Configure<Config>(builder.Configuration.GetSection("Greenhouse:Config"));
+
+// Configure Database
 builder.Services.AddDbContextFactory<MetricsContext>(options =>
 {
     options.UseCosmos(
@@ -40,13 +41,17 @@ builder.Services.AddDbContextFactory<MetricsContext>(options =>
         );
 });
 
+// Configure Syncfusion license
+var syncfusionLicense = builder.Configuration.GetSection("Greenhouse:Config:SyncfusionLicense").Value!;
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense);
+
+// Add services to the container.
+builder.Services.AddSyncfusionBlazor();
+builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddControllersWithViews();
-builder.Services.AddSyncfusionBlazor();
 
 var app = builder.Build();
-
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

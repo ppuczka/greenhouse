@@ -1,6 +1,7 @@
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Blazor.Data;
 
 namespace Greenhouse.Data.Services;
 
@@ -10,7 +11,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var sortedMetrics = context.GreenhouseMetrics.OrderByDescending(
-            item => item.DateTime).Take(500);
+            item => item.DateTime);
         return await sortedMetrics.ToListAsync();
     }
 

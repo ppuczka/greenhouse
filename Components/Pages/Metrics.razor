@@ -3,9 +3,8 @@
 @using Greenhouse.Data.Models
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.Data
-@using Syncfusion.Blazor.Grids.Internal
 @using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Lists
 
 @rendermode InteractiveServer
 
@@ -88,7 +87,7 @@ else
     @*     } *@
     @*     </tbody> *@
     @* </table> *@
-    <SfGrid DataSource="@_metricsList" AllowFiltering="true" AllowSorting="true" AllowPaging="true" AllowGrouping="true" AllowSelection="true" CssClass="full-page-grid">
+    <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true" AllowSelection="true" CssClass="full-page-grid">
         <GridPageSettings PageSize="20"></GridPageSettings>
         <GridColumns>
             <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date" Format="dd/MM/yyyy HH:mm:ss"></GridColumn>
@@ -105,7 +104,10 @@ else
             </GridColumn>
         </GridColumns>
         <GridTemplates>
-            <RowTemplate Context="com">
+            <DetailTemplate >
+                @{
+                    var metric = (context as GreenhouseMetric);
+                }
                 <div style="padding:20px">
                     <SfTab>
                         <TabItems>
@@ -121,13 +123,19 @@ else
                                     <TabHeader Text="Comments"></TabHeader>
                                 </ChildContent>
                                 <ContentTemplate>
-                                    <SfGrid DataSource="[com]" AllowPaging="true">
-                                        <GridPageSettings PageSize="6"></GridPageSettings>
-                                        <GridColumns>
-                                            <GridColumn Field=@nameof(MetricComment.Created) HeaderText="Order ID" TextAlign="TextAlign.Right" Width="110"> </GridColumn>
-                                            <GridColumn Field=@nameof(MetricComment.Comment) HeaderText="Customer ID" Width="110"></GridColumn>
-                                        </GridColumns>
-                                    </SfGrid>
+                                    @if (metric.Comments.Any())
+                                    {
+                                        <SfListView DataSource="@metric.Comments">
+                                            <ListViewFieldSettings TValue="MetricComment" Text="Comment" Id="Created"></ListViewFieldSettings>
+                                        </SfListView>
+                                    }
+                                    else
+                                    {
+                                        <div style="padding:25px">No comments available</div>
+                                    }
+                                    <div style="padding:10px; text-align: right;">
+                                        <SfButton CssClass="e-round" IconCss="e-icons e-plus" IsPrimary="true"></SfButton>
+                                    </div>
                                 </ContentTemplate>
                             </TabItem>
                             <TabItem>
@@ -142,7 +150,7 @@ else
                         </TabItems>
                     </SfTab>
                 </div>
-            </RowTemplate>
+            </DetailTemplate>
         </GridTemplates>
     </SfGrid>
 }
@@ -151,7 +159,6 @@ else
 
 {
     private List<GreenhouseMetric>? _metricsList;
-    private List<MetricComment> _comments { get; set; }
     
     public required string NewCommentText; 
     

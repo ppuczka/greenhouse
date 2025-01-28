@@ -14,6 +14,7 @@
       <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.46.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0" />
       <PackageReference Include="Radzen.Blazor" Version="5.7.4" />
+      <PackageReference Include="Syncfusion.Blazor.Buttons" Version="28.1.41" />
       <PackageReference Include="Syncfusion.Blazor.Calendars" Version="28.1.41" />
       <PackageReference Include="Syncfusion.Blazor.Grid" Version="28.1.41" />
       <PackageReference Include="Syncfusion.Blazor.Themes" Version="28.1.41" />

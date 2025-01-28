@@ -15,8 +15,12 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .alert-dark {
@@ -42,11 +46,15 @@
 
 .full-page-grid {
     height: 100vh; /* Full viewport height */
-    width: 100vw;  /* Full viewport width */
+    width: 100vw; /* Full viewport width */
 }
 
 body, html {
     margin: 0;
     padding: 0;
     overflow: hidden; /* Prevent scrolling */
+}
+
+.e-plus-icon::before {
+    content: '\e823';
 }
