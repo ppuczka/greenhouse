@@ -1,10 +1,14 @@
 @page "/metrics"
+@using System.ComponentModel.DataAnnotations
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Navigations
 @using Syncfusion.Blazor.Lists
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Inputs
+
 
 @rendermode InteractiveServer
 
@@ -87,24 +91,25 @@ else
     @*     } *@
     @*     </tbody> *@
     @* </table> *@
-    <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true" AllowSelection="true" CssClass="full-page-grid">
+    <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true" AllowSelection="true"
+            CssClass="full-page-grid"
+            ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Delete", "CsvExport", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
         <GridPageSettings PageSize="20"></GridPageSettings>
         <GridColumns>
-            <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date" Format="dd/MM/yyyy HH:mm:ss"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.Temperature) HeaderText="Temperature" Type="ColumnType.Double"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.Humidity) HeaderText="Humidity" Type="ColumnType.Double"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date"
+                        Format="dd/MM/yyyy HH:mm:ss"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.Temperature) HeaderText="Temperature"
+                        Type="ColumnType.Double"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.Humidity) HeaderText="Humidity"
+                        Type="ColumnType.Double"></GridColumn>
             <GridColumn Field=@nameof(GreenhouseMetric.HumidityLevel) HeaderText="Humidity Level"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoisture) HeaderText="Soil Moisture" Type="ColumnType.Double"></GridColumn>
+            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoisture) HeaderText="Soil Moisture"
+                        Type="ColumnType.Double"></GridColumn>
             <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel) HeaderText="Soil Moisture Level"></GridColumn>
             <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel) HeaderText="Soil Moisture Level"></GridColumn>
-            <GridColumn HeaderText="Actions" AllowFiltering="false" AllowSorting="false">
-                <Template>
-                    <SfButton CssClass="e-danger" >Delete</SfButton>
-                </Template>
-            </GridColumn>
         </GridColumns>
         <GridTemplates>
-            <DetailTemplate >
+            <DetailTemplate>
                 @{
                     var metric = (context as GreenhouseMetric);
                 }
@@ -125,17 +130,46 @@ else
                                 <ContentTemplate>
                                     @if (metric.Comments.Any())
                                     {
-                                        <SfListView DataSource="@metric.Comments">
-                                            <ListViewFieldSettings TValue="MetricComment" Text="Comment" Id="Created"></ListViewFieldSettings>
-                                        </SfListView>
+                                        <div style="padding:25px">
+                                            <ul>
+                                                @foreach (var comment in @metric.Comments)
+                                                {
+                                                    <li class="comment">
+                                                        <div class="comment-header">
+                                                            <span class="comment-date">@comment.Created</span>
+                                                        </div>
+                                                        <div class="comment-body">
+                                                            <span class="comment-text">@comment.Comment</span>
+                                                        </div>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
                                     }
                                     else
                                     {
-                                        <div style="padding:25px">No comments available</div>
+                                        <div style="padding:25px">No comments added yet</div>
                                     }
+
                                     <div style="padding:10px; text-align: right;">
-                                        <SfButton CssClass="e-round" IconCss="e-icons e-plus" IsPrimary="true"></SfButton>
+                                        <SfButton CssClass="e-round" IconCss="e-icons e-plus" IsPrimary="true"
+                                                  @onclick="() => ToggleCommentField(metric)"></SfButton>
                                     </div>
+
+                                    @if (metric.IsCommentFieldVisible)
+                                    {
+                                        <div style="padding:25px;">
+                                            <EditForm Context="formCommentContext" Model="@_formModel"
+                                                      OnValidSubmit="() => HandleValidSubmit(metric.Id)"
+                                                      OnInvalidSubmit="@HandleInvalidSubmit">
+                                                <SfTextArea Width="500" @bind-Value="@_formModel.TextInput"
+                                                            Placeholder="Enter the comment"
+                                                            FloatLabelType="@FloatLabelType.Auto"></SfTextArea>
+                                                <SfButton CssClass="e-success" style="margin-top: 10px">Submit</SfButton>
+                                            </EditForm>
+                                        </div>
+                                    }
+
                                 </ContentTemplate>
                             </TabItem>
                             <TabItem>
@@ -157,11 +191,12 @@ else
 
 @code
 
+
+
 {
     private List<GreenhouseMetric>? _metricsList;
-    
-    public required string NewCommentText; 
-    
+    private FormModel _formModel = new FormModel();
+
     protected override async Task OnInitializedAsync()
     {
         await LoadMetrics();
@@ -174,25 +209,31 @@ else
 
     private async Task OnDeleteClick(string toDelete)
     {
-        // e.StopPropagation(); 
         await GreenhouseMetricService.DeleteMetric(toDelete);
         await LoadMetrics();
     }
-
-    private async Task AddComment(string metricId)
-    {
-        await GreenhouseMetricService.AddComment(metricId, NewCommentText);
-        NewCommentText = string.Empty;
-        await LoadMetrics();
-    }
-
-    private void ToggleRow(GreenhouseMetric metric)
-    {
-        metric.IsExpanded = !metric.IsExpanded;
-    }
-
+    
     private void ToggleCommentField(GreenhouseMetric metric)
     {
         metric.IsCommentFieldVisible = !metric.IsCommentFieldVisible;
     }
+
+    private async Task HandleValidSubmit(string metricId)
+    {
+        await GreenhouseMetricService.AddComment(metricId, _formModel.TextInput);
+        _formModel.TextInput = string.Empty;
+        await LoadMetrics();    
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        // Handle the invalid form submission here
+    }
+    
+    public class FormModel
+    {
+        [Required(ErrorMessage = "Comment is required.")]
+        public string TextInput { get; set; }
+    }
+    
 }

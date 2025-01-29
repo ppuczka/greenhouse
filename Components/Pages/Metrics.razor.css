@@ -42,6 +42,35 @@
     align-self: flex-end;
 }
 
+.comment {
+    margin-top: 10px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.comment-date {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.comment-body {
+    padding-left: 10px;
+}
+
+.comment-text {
+    display: block;
+    margin-top: 5px;
+    font-size: 1em;
+    color: #333;
+}
+
 /*Grid*/
 
 .full-page-grid {
