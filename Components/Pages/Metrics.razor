@@ -26,71 +26,6 @@
 }
 else
 {
-    @* <table class="table"> *@
-    @*     <thead> *@
-    @*     <tr> *@
-    @*         <th>Date and time</th> *@
-    @*         <th>Temperature (C)</th> *@
-    @*         <th>Humidity (%)</th> *@
-    @*         <th>Humidity level</th> *@
-    @*         <th>Soil moisture</th> *@
-    @*         <th>Soil moisture level</th> *@
-    @*         <th>Actions</th> *@
-    @*     </tr> *@
-    @*     </thead> *@
-    @*     <tbody> @foreach (var metric in _metricsList) *@
-    @*     { *@
-    @*         <tr @onclick="() => ToggleRow(metric)"> *@
-    @*             <td>@metric.DateTime</td> *@
-    @*             <td>@metric.Temperature</td> *@
-    @*             <td>@metric.Humidity</td> *@
-    @*             <td>@metric.HumidityLevel</td> *@
-    @*             <td>@metric.SoilMoisture</td> *@
-    @*             <td>@metric.SoilMoistureLevel</td> *@
-    @*             <td> *@
-    @*                 $1$ <button class="btn btn-primary btn-sm" @onclick="AddComment">Add comment</button> #1# *@
-    @*                 <button class="btn btn-danger btn-sm" @onclick="(e) => OnDeleteClick(metric.Id)">Delete</button> *@
-    @*             </td> *@
-    @*         </tr> @if (metric.IsExpanded) *@
-    @*         { *@
-    @*             <tr> *@
-    @*                 <td colspan="7"> *@
-    @*                     <div class="alert alert-dark"> *@
-    @*                         @if (metric.Comments.Count > 0) *@
-    @*                         { *@
-    @*                             <h5>Comments:</h5> *@
-    @*                             <ul> *@
-    @*                                 @foreach (var comment in @metric.Comments) *@
-    @*                                 { *@
-    @*                                     <li> *@
-    @*                                         <span> <b>Date created:</b> @comment.Created <b>Text:</b> @comment.Comment</span> *@
-    @*                                     </li> *@
-    @*                                 } *@
-    @*                             </ul> *@
-    @*                         } *@
-    @*                         else *@
-    @*                         { *@
-    @*                             <p>No comments added yet</p> *@
-    @*                         } *@
-    @*                         <button class="btn btn-primary btn-sm add-comment-btn" *@
-    @*                                 @onclick="() => ToggleCommentField(metric)">Add Comment *@
-    @*                         </button> *@
-    @*                         @if (metric.IsCommentFieldVisible) *@
-    @*                         { *@
-    @*                             <div class="form-group mt-2 comment-form"> *@
-    @*                                 <input type="text" class="form-control" placeholder="Enter your comment" @bind="NewCommentText" /> *@
-    @*                                 <button class="btn btn-success btn-sm" @onclick="() => AddComment(metric.Id)"> *@
-    @*                                     Add comment *@
-    @*                                 </button> *@
-    @*                             </div> *@
-    @*                         } *@
-    @*                     </div> *@
-    @*                 </td> *@
-    @*             </tr> *@
-    @*         } *@
-    @*     } *@
-    @*     </tbody> *@
-    @* </table> *@
     <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true" AllowSelection="true"
             CssClass="full-page-grid"
             ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Delete", "CsvExport", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
@@ -160,12 +95,13 @@ else
                                     {
                                         <div style="padding:25px;">
                                             <EditForm Context="formCommentContext" Model="@_formModel"
-                                                      OnValidSubmit="() => HandleValidSubmit(metric.Id)"
-                                                      OnInvalidSubmit="@HandleInvalidSubmit">
+                                                      OnValidSubmit="() => HandleValidCommentSubmit(metric.Id)"
+                                                      OnInvalidSubmit="@HandleInvalidCommentSubmit">
                                                 <SfTextArea Width="500" @bind-Value="@_formModel.TextInput"
                                                             Placeholder="Enter the comment"
                                                             FloatLabelType="@FloatLabelType.Auto"></SfTextArea>
-                                                <SfButton CssClass="e-success" style="margin-top: 10px">Submit</SfButton>
+                                                <SfButton CssClass="e-success" style="margin-top: 10px">Submit
+                                                </SfButton>
                                             </EditForm>
                                         </div>
                                     }
@@ -177,8 +113,41 @@ else
                                     <TabHeader Text="Tags"></TabHeader>
                                 </ChildContent>
                                 <ContentTemplate>
-                                    <div style="padding-top: 35px; padding-left:20px;">
+                                    @if (metric.Tags != null && metric.Tags.Count > 0)
+                                    {
+                                        <div style="padding-top: 25px; padding-left:20px;">
+                                            <SfChip CssClass="e-primary chip">
+                                                <ChipItems>
+                                                    @foreach (var tag in metric.Tags)
+                                                    {
+                                                        <ChipItem Text="@tag"></ChipItem>
+                                                    }
+                                                </ChipItems>
+                                            </SfChip>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div style="padding:25px">No tags added yet</div>
+                                    }
+                                    <div style="padding:10px; text-align: right;">
+                                        <SfButton CssClass="e-round"
+                                                  IconCss="e-icons e-plus"
+                                                  IsPrimary="true"
+                                                  @onclick="() => ToggleTagField(metric)"></SfButton>
                                     </div>
+                                    @if (metric.IsTagFieldVisible)
+                                    {
+                                        <div style="padding:25px;">
+                                            <EditForm Context="formTagContext" Model="@_formModel"
+                                                      OnValidSubmit="() => HandleValidTagSubmit(metric.Id)">
+                                                <SfTextArea Width="500" @bind-Value="@_formModel.TextInput"
+                                                            Placeholder="Enter the comment"
+                                                            FloatLabelType="@FloatLabelType.Auto"></SfTextArea>
+                                                <SfButton CssClass="e-success" style="margin-top: 10px">Submit</SfButton>
+                                            </EditForm>
+                                        </div>
+                                    }
                                 </ContentTemplate>
                             </TabItem>
                         </TabItems>
@@ -193,9 +162,37 @@ else
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {
     private List<GreenhouseMetric>? _metricsList;
-    private FormModel _formModel = new FormModel();
+    private readonly FormModel _formModel = new FormModel();
 
     protected override async Task OnInitializedAsync()
     {
@@ -212,28 +209,40 @@ else
         await GreenhouseMetricService.DeleteMetric(toDelete);
         await LoadMetrics();
     }
-    
+
     private void ToggleCommentField(GreenhouseMetric metric)
     {
         metric.IsCommentFieldVisible = !metric.IsCommentFieldVisible;
     }
 
-    private async Task HandleValidSubmit(string metricId)
+    private void ToggleTagField(GreenhouseMetric metric)
+    {
+        metric.IsTagFieldVisible = !metric.IsTagFieldVisible;
+    }
+
+    private async Task HandleValidCommentSubmit(string metricId)
     {
         await GreenhouseMetricService.AddComment(metricId, _formModel.TextInput);
         _formModel.TextInput = string.Empty;
-        await LoadMetrics();    
+        await LoadMetrics();
     }
 
-    private void HandleInvalidSubmit()
+    private async Task HandleValidTagSubmit(string metricId)
+    {
+        await GreenhouseMetricService.AddTag(metricId, _formModel.TextInput);
+        _formModel.TextInput = string.Empty;
+        await LoadMetrics();
+    }
+
+    private void HandleInvalidCommentSubmit()
     {
         // Handle the invalid form submission here
     }
-    
+
     public class FormModel
     {
         [Required(ErrorMessage = "Comment is required.")]
         public string TextInput { get; set; }
     }
-    
+
 }

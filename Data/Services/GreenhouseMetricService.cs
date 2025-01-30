@@ -68,4 +68,24 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         }
         
     }
+
+    public async Task AddTag(string metricId, string tag)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var tags = tag.Split(" ").ToList();
+        try
+        {
+            var metric = await context.GreenhouseMetrics.FindAsync(metricId);
+            if (metric != null)
+            {
+                (metric.Tags as List<string>)?.AddRange(tags);
+                await context.SaveChangesAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 }

@@ -12,14 +12,15 @@ public class GreenhouseMetric
     public HumidityLevel HumidityLevel { get; set; }
     public TemperatureLevel TemperatureLevel { get; set; }
     public SoilMoistureLevel SoilMoistureLevel { get; set; }
+    public IList<String>? Tags { get; set; }
     public ICollection<MetricComment>? Comments { get; set; }
     public DateTime DateTime { get; set; }
-    
     [NotMapped]
     public bool IsExpanded { get; set; }
-    
     [NotMapped]
     public bool IsCommentFieldVisible { get; set; }
+    [NotMapped]
+    public bool IsTagFieldVisible { get; set; }
 }
 
 public enum HumidityLevel

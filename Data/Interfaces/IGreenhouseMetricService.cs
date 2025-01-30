@@ -9,4 +9,5 @@ public interface IGreenhouseMetricService
     public Task DeleteMetric(string metricId);
     public Task UpdateMetric(GreenhouseMetric greenhouseMetric);
     public Task AddComment(string metricId, string comment);
+    public Task AddTag(string metricId, string tag);
 }

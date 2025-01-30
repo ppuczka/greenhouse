@@ -49,6 +49,8 @@ public class MetricsContext : DbContext
 
         modelBuilder.Entity<GreenhouseMetric>().Property(g => g.DateTime).ToJsonProperty("date_time");
 
+        modelBuilder.Entity<GreenhouseMetric>().Property(g => g.Tags).ToJsonProperty("tags");
+        
         modelBuilder.Entity<GreenhouseMetric>().OwnsMany(
             o => o.Comments,
             comment =>
