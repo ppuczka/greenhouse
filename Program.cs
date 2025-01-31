@@ -5,7 +5,9 @@ using Greenhouse.Data;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Greenhouse.Data.Services;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Web;
 using Syncfusion.Blazor;
 
 // Get Azure credentials
@@ -51,6 +53,14 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddControllersWithViews();
 
+// Add Authentication 
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration)
+    .EnableTokenAcquisitionToCallDownstreamApi()
+    .AddInMemoryTokenCaches();
+
+builder.Services.AddCascadingAuthenticationState();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -60,6 +70,9 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.UseHttpsRedirection();
 

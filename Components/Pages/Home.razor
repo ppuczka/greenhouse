@@ -1,12 +1,10 @@
 ﻿@page "/"
-@using Greenhouse.Config
-@using Greenhouse.Data
+@attribute [Authorize]
+
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
-@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Authorization
 
-@inject Microsoft.Extensions.Options.IOptions<Config> Config
-@inject IDbContextFactory<MetricsContext> DbFactory
 @inject IGreenhouseMetricService GreenhouseMetricService
 
 <PageTitle>Dashboard</PageTitle>
