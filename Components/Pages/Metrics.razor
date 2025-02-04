@@ -1,7 +1,10 @@
 @page "/metrics"
+@attribute [Authorize]
+
 @using System.ComponentModel.DataAnnotations
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
+@using Microsoft.AspNetCore.Authorization
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Navigations

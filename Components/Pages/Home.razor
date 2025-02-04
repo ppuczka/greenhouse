@@ -4,6 +4,8 @@
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+
 
 @inject IGreenhouseMetricService GreenhouseMetricService
 
@@ -16,7 +18,7 @@ else
 {
     <h1>Dashboard</h1>
     <br>
-    <h4>Live metrics</h4>
+    <h4>Welcome @_userName Live metrics</h4>
     <h6>Last updated: <b>@_metric.DateTime</b></h6>
     <h6>Temperature: <b>@_metric.Temperature C</b></h6>
     <h6>Humidity: <b>@_metric.Humidity</b><b>%</b></h6>
@@ -27,9 +29,20 @@ else
 
 {
     private GreenhouseMetric? _metric;
-
+    private string _userName = String.Empty;
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+    
     protected override async Task OnInitializedAsync()
     {
+        
+        if (AuthState == null)
+        {
+            return;
+        }
+
+        var authState = await AuthState;
+        _userName = authState.User.Identity.Name;
         _metric = await GreenhouseMetricService.GetLatestMetric();
     }
 }
