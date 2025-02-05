@@ -6,12 +6,9 @@
 @using Greenhouse.Data.Models
 @using Microsoft.AspNetCore.Authorization
 @using Syncfusion.Blazor.Grids
-@using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Navigations
-@using Syncfusion.Blazor.Lists
-@using Syncfusion.Blazor.Cards
 @using Syncfusion.Blazor.Inputs
-
+@using Microsoft.AspNetCore.Components.Authorization
 
 @rendermode InteractiveServer
 
@@ -29,170 +26,150 @@
 }
 else
 {
-    <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true" AllowSelection="true"
-            CssClass="full-page-grid"
-            ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Delete", "CsvExport", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
-        <GridPageSettings PageSize="20"></GridPageSettings>
-        <GridColumns>
-            <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date"
-                        Format="dd/MM/yyyy HH:mm:ss"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.Temperature) HeaderText="Temperature"
-                        Type="ColumnType.Double"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.Humidity) HeaderText="Humidity"
-                        Type="ColumnType.Double"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.HumidityLevel) HeaderText="Humidity Level"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoisture) HeaderText="Soil Moisture"
-                        Type="ColumnType.Double"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel) HeaderText="Soil Moisture Level"></GridColumn>
-            <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel) HeaderText="Soil Moisture Level"></GridColumn>
-        </GridColumns>
-        <GridTemplates>
-            <DetailTemplate>
-                @{
-                    var metric = (context as GreenhouseMetric);
-                }
-                <div style="padding:20px">
-                    <SfTab>
-                        <TabItems>
-                            <TabItem>
-                                <ChildContent>
-                                    <TabHeader Text="Details"></TabHeader>
-                                </ChildContent>
-                                <ContentTemplate>
-                                </ContentTemplate>
-                            </TabItem>
-                            <TabItem>
-                                <ChildContent>
-                                    <TabHeader Text="Comments"></TabHeader>
-                                </ChildContent>
-                                <ContentTemplate>
-                                    @if (metric.Comments.Any())
-                                    {
-                                        <div style="padding:25px">
-                                            <ul>
-                                                @foreach (var comment in @metric.Comments)
-                                                {
-                                                    <li class="comment">
-                                                        <div class="comment-header">
-                                                            <span class="comment-date">@comment.Created</span>
-                                                        </div>
-                                                        <div class="comment-body">
-                                                            <span class="comment-text">@comment.Comment</span>
-                                                        </div>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        </div>
-                                    }
-                                    else
-                                    {
-                                        <div style="padding:25px">No comments added yet</div>
-                                    }
-
-                                    <div style="padding:10px; text-align: right;">
-                                        <SfButton CssClass="e-round" IconCss="e-icons e-plus" IsPrimary="true"
-                                                  @onclick="() => ToggleCommentField(metric)"></SfButton>
-                                    </div>
-
-                                    @if (metric.IsCommentFieldVisible)
-                                    {
-                                        <div style="padding:25px;">
-                                            <EditForm Context="formCommentContext" Model="@_formModel"
-                                                      OnValidSubmit="() => HandleValidCommentSubmit(metric.Id)"
-                                                      OnInvalidSubmit="@HandleInvalidCommentSubmit">
-                                                <SfTextArea Width="500" @bind-Value="@_formModel.TextInput"
-                                                            Placeholder="Enter the comment"
-                                                            FloatLabelType="@FloatLabelType.Auto"></SfTextArea>
-                                                <SfButton CssClass="e-success" style="margin-top: 10px">Submit
-                                                </SfButton>
-                                            </EditForm>
-                                        </div>
-                                    }
-
-                                </ContentTemplate>
-                            </TabItem>
-                            <TabItem>
-                                <ChildContent>
-                                    <TabHeader Text="Tags"></TabHeader>
-                                </ChildContent>
-                                <ContentTemplate>
-                                    @if (metric.Tags != null && metric.Tags.Count > 0)
-                                    {
-                                        <div style="padding-top: 25px; padding-left:20px;">
-                                            <SfChip CssClass="e-primary chip">
-                                                <ChipItems>
-                                                    @foreach (var tag in metric.Tags)
+<AuthorizeView Context="authContext">
+    <Authorized>
+        <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true"
+                AllowSelection="true"
+                CssClass="full-page-grid"
+                ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Delete", "CsvExport", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+            <GridPageSettings PageSize="20"></GridPageSettings>
+            <GridColumns>
+                <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date"
+                            Format="dd/MM/yyyy HH:mm:ss"></GridColumn>
+                <GridColumn Field=@nameof(GreenhouseMetric.Temperature) HeaderText="Temperature"
+                            Type="ColumnType.Double"></GridColumn>
+                <GridColumn Field=@nameof(GreenhouseMetric.Humidity) HeaderText="Humidity"
+                            Type="ColumnType.Double"></GridColumn>
+                <GridColumn Field=@nameof(GreenhouseMetric.HumidityLevel) HeaderText="Humidity Level"></GridColumn>
+                <GridColumn Field=@nameof(GreenhouseMetric.SoilMoisture) HeaderText="Soil Moisture"
+                            Type="ColumnType.Double"></GridColumn>
+                <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel)
+                            HeaderText="Soil Moisture Level"></GridColumn>
+                <GridColumn Field=@nameof(GreenhouseMetric.SoilMoistureLevel)
+                            HeaderText="Soil Moisture Level"></GridColumn>
+            </GridColumns>
+            <GridTemplates>
+                <DetailTemplate>
+                    @{
+                        var metric = (context as GreenhouseMetric);
+                    }
+                    <div style="padding:20px">
+                        <SfTab>
+                            <TabItems>
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Details"></TabHeader>
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                    </ContentTemplate>
+                                </TabItem>
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Comments"></TabHeader>
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                        @if (metric.Comments.Any())
+                                        {
+                                            <div style="padding:25px">
+                                                <ul>
+                                                    @foreach (var comment in @metric.Comments)
                                                     {
-                                                        <ChipItem Text="@tag"></ChipItem>
+                                                        <li class="comment">
+                                                            <div class="comment-header">
+                                                                <span class="comment-date">@comment.Created</span>
+                                                            </div>
+                                                            <div class="comment-body">
+                                                                <span class="comment-text">@comment.Comment</span>
+                                                            </div>
+                                                        </li>
                                                     }
-                                                </ChipItems>
-                                            </SfChip>
+                                                </ul>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="padding:25px">No comments added yet</div>
+                                        }
+
+                                        <div style="padding:10px; text-align: right;">
+                                            <SfButton CssClass="e-round" IconCss="e-icons e-plus" IsPrimary="true"
+                                                      @onclick="() => ToggleCommentField(metric)"></SfButton>
                                         </div>
-                                    }
-                                    else
-                                    {
-                                        <div style="padding:25px">No tags added yet</div>
-                                    }
-                                    <div style="padding:10px; text-align: right;">
-                                        <SfButton CssClass="e-round"
-                                                  IconCss="e-icons e-plus"
-                                                  IsPrimary="true"
-                                                  @onclick="() => ToggleTagField(metric)"></SfButton>
-                                    </div>
-                                    @if (metric.IsTagFieldVisible)
-                                    {
-                                        <div style="padding:25px;">
-                                            <EditForm Context="formTagContext" Model="@_formModel"
-                                                      OnValidSubmit="() => HandleValidTagSubmit(metric.Id)">
-                                                <SfTextArea Width="500" @bind-Value="@_formModel.TextInput"
-                                                            Placeholder="Enter the comment"
-                                                            FloatLabelType="@FloatLabelType.Auto"></SfTextArea>
-                                                <SfButton CssClass="e-success" style="margin-top: 10px">Submit</SfButton>
-                                            </EditForm>
+
+                                        @if (metric.IsCommentFieldVisible)
+                                        {
+                                            <div style="padding:25px;">
+                                                <EditForm Context="formCommentContext" Model="@_formModel"
+                                                          OnValidSubmit="() => HandleValidCommentSubmit(metric.Id)"
+                                                          OnInvalidSubmit="@HandleInvalidCommentSubmit">
+                                                    <SfTextArea Width="500" @bind-Value="@_formModel.TextInput"
+                                                                Placeholder="Enter the comment"
+                                                                FloatLabelType="@FloatLabelType.Auto"></SfTextArea>
+                                                    <SfButton CssClass="e-success" style="margin-top: 10px">Submit
+                                                    </SfButton>
+                                                </EditForm>
+                                            </div>
+                                        }
+
+                                    </ContentTemplate>
+                                </TabItem>
+                                <TabItem>
+                                    <ChildContent>
+                                        <TabHeader Text="Tags"></TabHeader>
+                                    </ChildContent>
+                                    <ContentTemplate>
+                                        @if (metric.Tags != null && metric.Tags.Count > 0)
+                                        {
+                                            <div style="padding-top: 25px; padding-left:20px;">
+                                                <SfChip CssClass="e-primary chip">
+                                                    <ChipItems>
+                                                        @foreach (var tag in metric.Tags)
+                                                        {
+                                                            <ChipItem Text="@tag"></ChipItem>
+                                                        }
+                                                    </ChipItems>
+                                                </SfChip>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div style="padding:25px">No tags added yet</div>
+                                        }
+                                        <div style="padding:10px; text-align: right;">
+                                            <SfButton CssClass="e-round"
+                                                      IconCss="e-icons e-plus"
+                                                      IsPrimary="true"
+                                                      @onclick="() => ToggleTagField(metric)"></SfButton>
                                         </div>
-                                    }
-                                </ContentTemplate>
-                            </TabItem>
-                        </TabItems>
-                    </SfTab>
-                </div>
-            </DetailTemplate>
-        </GridTemplates>
-    </SfGrid>
+                                        @if (metric.IsTagFieldVisible)
+                                        {
+                                            <div style="padding:25px;">
+                                                <EditForm Context="formTagContext" Model="@_formModel"
+                                                          OnValidSubmit="() => HandleValidTagSubmit(metric.Id)">
+                                                    <SfTextArea Width="500" @bind-Value="@_formModel.TextInput"
+                                                                Placeholder="Enter the comment"
+                                                                FloatLabelType="@FloatLabelType.Auto"></SfTextArea>
+                                                    <SfButton CssClass="e-success" style="margin-top: 10px">Submit
+                                                    </SfButton>
+                                                </EditForm>
+                                            </div>
+                                        }
+                                    </ContentTemplate>
+                                </TabItem>
+                            </TabItems>
+                        </SfTab>
+                    </div>
+                </DetailTemplate>
+            </GridTemplates>
+        </SfGrid>
+    </Authorized>
+    <NotAuthorized>
+        <p><em>You are not authorized to view this page. Please login first...</em></p>
+    </NotAuthorized>
+</AuthorizeView>
 }
 
 @code
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {
     private List<GreenhouseMetric>? _metricsList;
     private readonly FormModel _formModel = new FormModel();

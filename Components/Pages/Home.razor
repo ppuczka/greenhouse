@@ -6,43 +6,44 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 
-
 @inject IGreenhouseMetricService GreenhouseMetricService
 
 <PageTitle>Dashboard</PageTitle>
-@if (_metric == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <h1>Dashboard</h1>
-    <br>
-    <h4>Welcome @_userName Live metrics</h4>
-    <h6>Last updated: <b>@_metric.DateTime</b></h6>
-    <h6>Temperature: <b>@_metric.Temperature C</b></h6>
-    <h6>Humidity: <b>@_metric.Humidity</b><b>%</b></h6>
-    <h6>Soil Moisture: <b>@_metric.SoilMoistureLevel</b></h6>
-}
-
-@code
-
-{
-    private GreenhouseMetric? _metric;
-    private string _userName = String.Empty;
-    [CascadingParameter]
-    private Task<AuthenticationState>? AuthState { get; set; }
-    
-    protected override async Task OnInitializedAsync()
-    {
-        
-        if (AuthState == null)
+<AuthorizeView>
+    <Authorized>
+        @if (_metric == null)
         {
-            return;
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <h1>Dashboard</h1>
+            <br>
+            <h4>Live metrics</h4>
+            <h6>Last updated: <b>@_metric.DateTime</b></h6>
+            <h6>Temperature: <b>@_metric.Temperature C</b></h6>
+            <h6>Humidity: <b>@_metric.Humidity</b><b>%</b></h6>
+            <h6>Soil Moisture: <b>@_metric.SoilMoistureLevel</b></h6>
         }
 
-        var authState = await AuthState;
-        _userName = authState.User.Identity.Name;
-        _metric = await GreenhouseMetricService.GetLatestMetric();
-    }
-}
+        @code
+
+        {
+            private GreenhouseMetric? _metric;
+            private string _userName = String.Empty;
+
+            private string? logoutRedirectUri;
+            
+            [CascadingParameter]
+            private Task<AuthenticationState>? AuthState { get; set; }
+            
+            protected override async Task OnInitializedAsync()
+            {
+                _metric = await GreenhouseMetricService.GetLatestMetric();
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p><em>You are not authorized to view this page. Please login first...</em></p>
+    </NotAuthorized>
+</AuthorizeView>

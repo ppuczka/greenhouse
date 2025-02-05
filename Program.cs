@@ -5,6 +5,8 @@ using Greenhouse.Data;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Greenhouse.Data.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -53,6 +55,7 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense
 // Add services to the container.
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddSingleton(Config);
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddControllersWithViews();
 
@@ -91,5 +94,13 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+
+app.MapGet("/signout-oidc", async context =>
+{
+    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    context.Response.Redirect("/logged-out");
+});
+
+app.MapGet("/logged-out", () => Results.Content("<h1>You have been logged out.</h1>"));
 
 app.Run();

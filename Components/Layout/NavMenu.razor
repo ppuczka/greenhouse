@@ -1,34 +1,83 @@
-﻿ <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
-     <div class="container-fluid">
-         <a class="navbar-brand" href="">PiGreenhouse</a>
-         <button class="navbar-toggler @NavButtonCssClass" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
-                 aria-controls="navbarCollapse" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
-             <span class="navbar-toggler-icon"></span>
-         </button>
-         <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse" @onclick="ToggleNavMenu">
-             <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                 <li class="nav-item">
-                     <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                         <span class="oi oi-home" aria-hidden="true"></span> Dashboard
-                     </NavLink>
-                 </li>
-                 <li class="nav-item">
-                     <NavLink class="nav-link" href="/metrics">
-                         <span class="oi oi-plus" aria-hidden="true"></span> Metrics
-                     </NavLink>
-                 </li>
-             </ul>
-         </div>
-     </div>
- </nav>
+﻿@using Greenhouse.Config
+@using Microsoft.AspNetCore.Components.Authorization
 
- @code {
-     private bool collapseNavMenu = true;
-     private string? NavBarCssClass => collapseNavMenu ? null : "show";
-     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@inject Config AppConfig
+@rendermode InteractiveServer
 
-     private void ToggleNavMenu()
-     {
-         collapseNavMenu = !collapseNavMenu;
-     }
- }
+<nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">PiGreenhouse</a>
+        <button class="navbar-toggler @NavButtonCssClass" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
+                aria-controls="navbarCollapse" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Dashboard
+                    </NavLink>
+                </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/metrics">
+                        <span class="oi oi-plus" aria-hidden="true"></span> Metrics
+                    </NavLink>
+                </li>
+            </ul>
+            <ul class="navbar-nav ms-auto mb-2 mb-md-0 d-flex align-items-center">
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item me-3">
+                            <span class="navbar-text">Welcome @_userName!</span>
+                        </li>
+                        <li class="nav-item me-2">
+                            <button class="btn btn-outline-light btn-sm" @onclick="@(e => Logout())">Logout</button>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+@code {
+    private bool collapseNavMenu = true;
+    private string? NavBarCssClass => collapseNavMenu ? null : "show";
+    private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
+    
+    private string _userName = String.Empty;
+    private string? logoutRedirectUri;
+            
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+            
+    protected override async Task OnInitializedAsync()
+    {
+                
+        if (AuthState == null)
+        {
+            return;
+        }
+
+        var authState = await AuthState;
+        _userName = authState.User.Identity.Name;
+    }
+
+    private void Logout()
+    {
+        {
+            var request = HttpContextAccessor.HttpContext?.Request;
+            logoutRedirectUri = AppConfig.OidcLogoutRedirectUri + Uri.EscapeDataString($"{request.Scheme}://{request.Host}/") + AppConfig.OidcLogoutEndpoint;
+            NavigationManager.NavigateTo(logoutRedirectUri);
+        }
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+}

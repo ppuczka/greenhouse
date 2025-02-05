@@ -6,4 +6,7 @@ public class Config
     public string? AppVersion { get; }
     public string? DatabaseEndpoint { get; }
     public string? DatabaseName { get; }
+    
+    public string? OidcLogoutEndpoint { get; }
+    public string? OidcLogoutRedirectUri { get; }
 }
