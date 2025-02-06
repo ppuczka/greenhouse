@@ -27,15 +27,8 @@
         }
 
         @code
-
         {
             private GreenhouseMetric? _metric;
-            private string _userName = String.Empty;
-
-            private string? logoutRedirectUri;
-            
-            [CascadingParameter]
-            private Task<AuthenticationState>? AuthState { get; set; }
             
             protected override async Task OnInitializedAsync()
             {

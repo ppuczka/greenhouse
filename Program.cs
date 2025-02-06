@@ -55,7 +55,6 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense
 // Add services to the container.
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
-builder.Services.AddSingleton(Config);
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddControllersWithViews();
 

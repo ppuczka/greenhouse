@@ -1,9 +1,10 @@
-﻿@using Greenhouse.Config
-@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Greenhouse.Config
 
 @inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
-@inject Config AppConfig
+@inject Microsoft.Extensions.Options.IOptions<Config> Config
+
 @rendermode InteractiveServer
 
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-4">
@@ -70,7 +71,7 @@
     {
         {
             var request = HttpContextAccessor.HttpContext?.Request;
-            logoutRedirectUri = AppConfig.OidcLogoutRedirectUri + Uri.EscapeDataString($"{request.Scheme}://{request.Host}/") + AppConfig.OidcLogoutEndpoint;
+            logoutRedirectUri = Config.Value.OidcLogoutRedirectUri + Uri.EscapeDataString($"{request.Scheme}://{request.Host}/") + Config.Value.OidcLogoutEndpoint;
             NavigationManager.NavigateTo(logoutRedirectUri);
         }
     }
