@@ -1,10 +1,13 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 @attribute [Authorize]
 
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using Syncfusion.Blazor.Layouts
+@using Syncfusion.Blazor.CircularGauge
 
 @inject IGreenhouseMetricService GreenhouseMetricService
 
@@ -17,19 +20,52 @@
         }
         else
         {
-            <h1>Dashboard</h1>
-            <br>
-            <h4>Live metrics</h4>
-            <h6>Last updated: <b>@_metric.DateTime</b></h6>
-            <h6>Temperature: <b>@_metric.Temperature C</b></h6>
-            <h6>Humidity: <b>@_metric.Humidity</b><b>%</b></h6>
-            <h6>Soil Moisture: <b>@_metric.SoilMoistureLevel</b></h6>
+            <div class="dashboard-container">
+                <SfDashboardLayout CellSpacing="@(new double[]{20, 20})" Columns="4">
+                    <DashboardLayoutPanels>
+                        <DashboardLayoutPanel>
+                            <ContentTemplate>
+                                <div class="gauge-container">
+                                    <SfCircularGauge Width="100%" Height="100%" Background="transparent">
+                                        <CircularGaugeAxes>
+                                            <CircularGaugeAxis>
+                                                <CircularGaugeRanges>
+                                                    <CircularGaugeRange Start=0 End=50></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=50 End=100></CircularGaugeRange>
+                                                </CircularGaugeRanges>
+                                                <CircularGaugePointers>
+                                                    <CircularGaugePointer Value=65></CircularGaugePointer>
+                                                </CircularGaugePointers>
+                                            </CircularGaugeAxis>
+                                        </CircularGaugeAxes>
+                                    </SfCircularGauge>
+                                </div>
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
+                        <DashboardLayoutPanel SizeX=2 SizeY=2 Column=1>
+                            <ContentTemplate>
+                                <div>1</div>
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
+                        <DashboardLayoutPanel SizeY=2 Column=3>
+                            <ContentTemplate>
+                                <div>2</div>
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
+                        <DashboardLayoutPanel Row=1>
+                            <ContentTemplate>
+                                <div>3</div>
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
+                    </DashboardLayoutPanels>
+                </SfDashboardLayout>
+            </div>
         }
 
         @code
         {
             private GreenhouseMetric? _metric;
-            
+
             protected override async Task OnInitializedAsync()
             {
                 _metric = await GreenhouseMetricService.GetLatestMetric();
@@ -40,3 +76,30 @@
         <p><em>You are not authorized to view this page. Please login first...</em></p>
     </NotAuthorized>
 </AuthorizeView>
+
+<style>
+    .dashboard-container {
+        display: flex;
+        justify-content: center; /* Center horizontally */
+        margin-top: 20px; /* Optional: Add some margin from the top */
+    }
+
+    .gauge-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+    }
+
+    .e-panel-content {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    /* Ensure the CircularGauge fits within the panel */
+    .gauge-container .e-circulargauge {
+        max-width: 100%;
+        max-height: 100%;
+    }
+</style>
