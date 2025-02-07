@@ -8,53 +8,125 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Syncfusion.Blazor.Layouts
 @using Syncfusion.Blazor.CircularGauge
+@using Syncfusion.Blazor.Charts
 
 @inject IGreenhouseMetricService GreenhouseMetricService
+@inject IGreenhouseMetricExtension GreenhouseMetricExtension
 
 <PageTitle>Dashboard</PageTitle>
 <AuthorizeView>
     <Authorized>
-        @if (_metric == null)
+        @if (_latestMetric == null)
         {
             <p><em>Loading...</em></p>
         }
         else
         {
-            <div class="dashboard-container">
-                <SfDashboardLayout CellSpacing="@(new double[]{20, 20})" Columns="4">
+            <div class="content">
+                <SfDashboardLayout CellSpacing="@(new double[] { 20, 20 })" Columns="3">
+                    <DashboardLayoutEvents Created="Created" OnWindowResize="@ResizingWindow"
+                                           Resizing="@ResizingWindow"></DashboardLayoutEvents>
                     <DashboardLayoutPanels>
-                        <DashboardLayoutPanel>
+                        <DashboardLayoutPanel Row="0">
+                            <HeaderTemplate>
+                                <div class='header'>Temperature</div>
+                            </HeaderTemplate>
                             <ContentTemplate>
-                                <div class="gauge-container">
-                                    <SfCircularGauge Width="100%" Height="100%" Background="transparent">
+                                @if (IsInitialRender)
+                                {
+                                    <SfCircularGauge ID="Temperature" @ref="_temperature" Background="transparent"
+                                                     Height="150%" Width="100%">
                                         <CircularGaugeAxes>
-                                            <CircularGaugeAxis>
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="10" Maximum="40" >
                                                 <CircularGaugeRanges>
-                                                    <CircularGaugeRange Start=0 End=50></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=50 End=100></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=17 End=25 Color="Green"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=0 End=17 ></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=25 End=40 Color="Red"></CircularGaugeRange>
                                                 </CircularGaugeRanges>
                                                 <CircularGaugePointers>
-                                                    <CircularGaugePointer Value=65></CircularGaugePointer>
+                                                    <CircularGaugePointer Value=@_latestMetric.Temperature></CircularGaugePointer>
                                                 </CircularGaugePointers>
                                             </CircularGaugeAxis>
                                         </CircularGaugeAxes>
                                     </SfCircularGauge>
-                                </div>
+                                }
                             </ContentTemplate>
                         </DashboardLayoutPanel>
-                        <DashboardLayoutPanel SizeX=2 SizeY=2 Column=1>
+                        <DashboardLayoutPanel SizeX=2 Column=2 Row="0">
                             <ContentTemplate>
-                                <div>1</div>
+                                <SfChart>
+                                    <ChartPrimaryXAxis
+                                        ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+                                    <ChartSeriesCollection>
+                                        <ChartSeries 
+                                            DataSource="@_last7DaysMetrics"
+                                            XName="DateTime"
+                                            YName="Temperature"
+                                            Type="ChartSeriesType.MultiColoredLine">
+                                            
+                                        </ChartSeries>
+                                    </ChartSeriesCollection>
+                                </SfChart>
                             </ContentTemplate>
                         </DashboardLayoutPanel>
-                        <DashboardLayoutPanel SizeY=2 Column=3>
+                        <DashboardLayoutPanel Row="1">
+                            <HeaderTemplate>
+                                <div class='header'>Humidity</div>
+                            </HeaderTemplate>
+                            <ContentTemplate>
+                                @if (IsInitialRender)
+                                {
+                                    <SfCircularGauge ID="Humidity" @ref="_humidity" Background="transparent"
+                                                     Height="150%" Width="100%">
+                                        <CircularGaugeAxes>
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="20" Maximum="90" >
+                                                <CircularGaugeRanges>
+                                                    <CircularGaugeRange Start=40 End=60 Color="Green"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=60 End=90 ></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=20 End=40 Color="Red"></CircularGaugeRange>
+                                                </CircularGaugeRanges>
+                                                <CircularGaugePointers>
+                                                    <CircularGaugePointer Value=@_latestMetric.Humidity></CircularGaugePointer>
+                                                </CircularGaugePointers>
+                                            </CircularGaugeAxis>
+                                        </CircularGaugeAxes>
+                                    </SfCircularGauge>
+                                }
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
+                        <DashboardLayoutPanel SizeX=2 Column=2 Row="1">
                             <ContentTemplate>
                                 <div>2</div>
                             </ContentTemplate>
                         </DashboardLayoutPanel>
-                        <DashboardLayoutPanel Row=1>
+                        <DashboardLayoutPanel Row=2>
+                            <HeaderTemplate>
+                                <div class='header'>Soil Moisture</div>
+                            </HeaderTemplate>
                             <ContentTemplate>
-                                <div>3</div>
+                                @if (IsInitialRender)
+                                {
+                                    <SfCircularGauge ID="SoilMoisture" @ref="_humidity" Background="transparent"
+                                                     Height="150%" Width="100%">
+                                        <CircularGaugeAxes>
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="20" Maximum="90" >
+                                                <CircularGaugeRanges>
+                                                    <CircularGaugeRange Start=40 End=60 Color="Green"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=60 End=90 ></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=20 End=40 Color="Red"></CircularGaugeRange>
+                                                </CircularGaugeRanges>
+                                                <CircularGaugePointers>
+                                                    <CircularGaugePointer Value=20></CircularGaugePointer>
+                                                </CircularGaugePointers>
+                                            </CircularGaugeAxis>
+                                        </CircularGaugeAxes>
+                                    </SfCircularGauge>
+                                }
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
+                        <DashboardLayoutPanel SizeX=2 Column=2 Row="2">
+                            <ContentTemplate>
+                                <div>2</div>
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                     </DashboardLayoutPanels>
@@ -64,11 +136,42 @@
 
         @code
         {
-            private GreenhouseMetric? _metric;
+            private SfCircularGauge? _temperature;
+            private SfCircularGauge? _humidity;
+            private GreenhouseMetric? _latestMetric;
+            private List<GreenhouseMetric> _last7DaysMetrics = [];
+            
+            private bool IsInitialRender { get; set; }
 
+            private Timer? _resizeTimer;
+
+            public async void Created(Object args)
+            {
+                await Task.Yield();
+                IsInitialRender = true;
+            }
+            
             protected override async Task OnInitializedAsync()
             {
-                _metric = await GreenhouseMetricService.GetLatestMetric();
+                _latestMetric = await GreenhouseMetricService.GetLatestMetric();
+                _last7DaysMetrics = await GreenhouseMetricService.GetLast7DaysMetrics();
+            }
+
+            private async Task ResizingWindow(ResizeArgs args)
+            {
+                if (_resizeTimer != null)
+                {
+                    _resizeTimer.Dispose();
+                }
+
+                _resizeTimer = new Timer(async _ => { await InvokeAsync(() => { RefreshComponents(); }); }, null, 500, Timeout.Infinite);
+            }
+
+            private async Task RefreshComponents()
+            {
+                await Task.Yield();
+                if (_temperature != null) await _temperature.RefreshAsync();
+                if (_humidity != null) await _humidity.RefreshAsync();
             }
         }
     </Authorized>
@@ -76,30 +179,3 @@
         <p><em>You are not authorized to view this page. Please login first...</em></p>
     </NotAuthorized>
 </AuthorizeView>
-
-<style>
-    .dashboard-container {
-        display: flex;
-        justify-content: center; /* Center horizontally */
-        margin-top: 20px; /* Optional: Add some margin from the top */
-    }
-
-    .gauge-container {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        width: 100%;
-    }
-
-    .e-panel-content {
-        text-align: center;
-        margin-top: 10px;
-    }
-
-    /* Ensure the CircularGauge fits within the panel */
-    .gauge-container .e-circulargauge {
-        max-width: 100%;
-        max-height: 100%;
-    }
-</style>

@@ -1,6 +1,8 @@
+using System.Linq.Dynamic.Core;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Blazor.Data;
 
 namespace Greenhouse.Data.Services;
 
@@ -20,6 +22,16 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         var sortedMetrics = context.GreenhouseMetrics.OrderByDescending(
             item => item.DateTime);
         return await sortedMetrics.FirstAsync();
+    }
+
+    public async Task<List<GreenhouseMetric>> GetLast7DaysMetrics()
+    {
+        var fromDate = DateTime.Now.AddDays(-7);
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var fromDateMetrics = context.GreenhouseMetrics
+            .Where(item => item.DateTime >= fromDate)
+            .Where(item => (item.DateTime.Hour == 9 || item.DateTime.Hour == 18) && item.DateTime.Minute == 30);
+        return await fromDateMetrics.ToListAsync();
     }
 
     public async Task DeleteMetric(string metricId)

@@ -2,6 +2,7 @@ using Azure.Identity;
 using Greenhouse.Components;
 using Greenhouse.Config;
 using Greenhouse.Data;
+using Greenhouse.Data.Extensions;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Greenhouse.Data.Services;
@@ -56,6 +57,7 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
+builder.Services.AddScoped<IGreenhouseMetricExtension, GreenhouseMetricExtensions>();
 builder.Services.AddControllersWithViews();
 
 // Add Authentication 
