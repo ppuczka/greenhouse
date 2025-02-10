@@ -59,7 +59,6 @@ builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddScoped<IGreenhouseMetricExtension, GreenhouseMetricExtensions>();
-builder.Services.AddScoped<IMetricChartDataService, MetricChartDataService>();
 builder.Services.AddControllersWithViews();
 
 // Add Authentication 

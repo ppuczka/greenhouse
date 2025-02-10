@@ -4,5 +4,5 @@ namespace Greenhouse.Data.Interfaces;
 
 public interface IGreenhouseMetricExtension
 {
-    List<MetricChartData> ToDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector);
+    List<MetricChartData> ToDataCharts(List<GreenhouseMetric> metrics);
 }

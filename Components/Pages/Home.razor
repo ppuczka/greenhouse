@@ -11,7 +11,7 @@
 @using Syncfusion.Blazor.Charts
 
 @inject IGreenhouseMetricService GreenhouseMetricService
-@inject IMetricChartDataService MetricChartDataService
+@inject IGreenhouseMetricExtension GreenhouseMetricExtension
 
 <PageTitle>Dashboard</PageTitle>
 <AuthorizeView>
@@ -28,26 +28,23 @@
                                            Resizing="@ResizingWindow"></DashboardLayoutEvents>
                     <DashboardLayoutPanels>
                         <DashboardLayoutPanel Row="0">
+                            <HeaderTemplate>
+                                <div class='header'>Temperature</div>
+                            </HeaderTemplate>
                             <ContentTemplate>
                                 @if (IsInitialRender)
                                 {
-                                    <SfCircularGauge ID="Temperature"
-                                                     Title="Current Temperature"
-                                                     @ref="_temperature"
-                                                     Background="transparent"
+                                    <SfCircularGauge ID="Temperature" @ref="_temperature" Background="transparent"
                                                      Height="150%" Width="100%">
                                         <CircularGaugeAxes>
-                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="10" Maximum="40">
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="10" Maximum="40" >
                                                 <CircularGaugeRanges>
-                                                    <CircularGaugeRange Start=17 End=25
-                                                                        Color="Green"></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=0 End=17></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=25 End=40
-                                                                        Color="Red"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=17 End=25 Color="Green"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=0 End=17 ></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=25 End=40 Color="Red"></CircularGaugeRange>
                                                 </CircularGaugeRanges>
                                                 <CircularGaugePointers>
-                                                    <CircularGaugePointer
-                                                        Value=@_latestMetric.Temperature></CircularGaugePointer>
+                                                    <CircularGaugePointer Value=@_latestMetric.Temperature></CircularGaugePointer>
                                                 </CircularGaugePointers>
                                             </CircularGaugeAxis>
                                         </CircularGaugeAxes>
@@ -57,54 +54,39 @@
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel SizeX=2 Column=2 Row="0">
                             <ContentTemplate>
-                                <SfChart Title="Temperature Weekly" Palettes="@_palettes">
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                    </ChartPrimaryXAxis>
-
+                                <SfChart>
+                                    <ChartPrimaryXAxis
+                                        ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
                                     <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@_temperatureReport"
-                                                     High="30"
-                                                     XName="WeekDay"
-                                                     YName="High"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="@_temperatureReport"
-                                                     XName="WeekDay"
-                                                     YName="Low"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
+                                        <ChartSeries 
+                                            DataSource="@_last7DaysMetrics"
+                                            XName="DateTime"
+                                            YName="Temperature"
+                                            Type="ChartSeriesType.MultiColoredLine">
+                                            
                                         </ChartSeries>
                                     </ChartSeriesCollection>
                                 </SfChart>
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel Row="1">
+                            <HeaderTemplate>
+                                <div class='header'>Humidity</div>
+                            </HeaderTemplate>
                             <ContentTemplate>
                                 @if (IsInitialRender)
                                 {
-                                    <SfCircularGauge ID="Humidity"
-                                                     Title="Current Humidity"
-                                                     @ref="_humidity"
-                                                     Background="transparent"
-                                                     Height="150%"
-                                                     Width="100%">
+                                    <SfCircularGauge ID="Humidity" @ref="_humidity" Background="transparent"
+                                                     Height="150%" Width="100%">
                                         <CircularGaugeAxes>
-                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="20" Maximum="90">
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="20" Maximum="90" >
                                                 <CircularGaugeRanges>
-                                                    <CircularGaugeRange Start=40 End=60
-                                                                        Color="Green"></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=60 End=90></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=20 End=40
-                                                                        Color="Red"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=40 End=60 Color="Green"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=60 End=90 ></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=20 End=40 Color="Red"></CircularGaugeRange>
                                                 </CircularGaugeRanges>
                                                 <CircularGaugePointers>
-                                                    <CircularGaugePointer
-                                                        Value=@_latestMetric.Humidity></CircularGaugePointer>
+                                                    <CircularGaugePointer Value=@_latestMetric.Humidity></CircularGaugePointer>
                                                 </CircularGaugePointers>
                                             </CircularGaugeAxis>
                                         </CircularGaugeAxes>
@@ -114,49 +96,24 @@
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel SizeX=2 Column=2 Row="1">
                             <ContentTemplate>
-                                <SfChart Title="Air Humidity Weekly" Palettes="@_palettes">
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                    </ChartPrimaryXAxis>
-
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@_airHumidityReport"
-                                                     XName="WeekDay"
-                                                     YName="High"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="@_airHumidityReport"
-                                                     XName="WeekDay"
-                                                     YName="Low"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                </SfChart>
+                                <div>2</div>
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel Row=2>
+                            <HeaderTemplate>
+                                <div class='header'>Soil Moisture</div>
+                            </HeaderTemplate>
                             <ContentTemplate>
                                 @if (IsInitialRender)
                                 {
-                                    <SfCircularGauge ID="SoilMoisture"
-                                                     @ref="_humidity"
-                                                     Title="Current Soil Moisture"
-                                                     Background="transparent"
-                                                     Height="150%"
-                                                     Width="100%">
+                                    <SfCircularGauge ID="SoilMoisture" @ref="_humidity" Background="transparent"
+                                                     Height="150%" Width="100%">
                                         <CircularGaugeAxes>
-                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="20" Maximum="90">
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="20" Maximum="90" >
                                                 <CircularGaugeRanges>
-                                                    <CircularGaugeRange Start=40 End=60
-                                                                        Color="Green"></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=60 End=90></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=20 End=40
-                                                                        Color="Red"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=40 End=60 Color="Green"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=60 End=90 ></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=20 End=40 Color="Red"></CircularGaugeRange>
                                                 </CircularGaugeRanges>
                                                 <CircularGaugePointers>
                                                     <CircularGaugePointer Value=20></CircularGaugePointer>
@@ -169,29 +126,7 @@
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel SizeX=2 Column=2 Row="2">
                             <ContentTemplate>
-                                <SfChart Title="Soil Moisture Weekly" Palettes="@_palettes">
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                    </ChartPrimaryXAxis>
-
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@_soilMoistureReport"
-                                                     XName="WeekDay"
-                                                     YName="High"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="@_soilMoistureReport"
-                                                     XName="WeekDay"
-                                                     YName="Low"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                </SfChart>
+                                <div>2</div>
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                     </DashboardLayoutPanels>
@@ -200,19 +135,12 @@
         }
 
         @code
-        
         {
-
-            private readonly string[] _palettes = ["#F6B53F", "#6FAAB0"];
-
             private SfCircularGauge? _temperature;
             private SfCircularGauge? _humidity;
             private GreenhouseMetric? _latestMetric;
+            private List<GreenhouseMetric> _last7DaysMetrics = [];
             
-            private List<MetricChartData>? _temperatureReport;
-            private List<MetricChartData>? _airHumidityReport;
-            private List<MetricChartData>? _soilMoistureReport;
-
             private bool IsInitialRender { get; set; }
 
             private Timer? _resizeTimer;
@@ -222,13 +150,11 @@
                 await Task.Yield();
                 IsInitialRender = true;
             }
-
+            
             protected override async Task OnInitializedAsync()
             {
                 _latestMetric = await GreenhouseMetricService.GetLatestMetric();
-                _temperatureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Temperature);
-                _airHumidityReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Humidity);
-                _soilMoistureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.SoilMoisture);
+                _last7DaysMetrics = await GreenhouseMetricService.GetLast7DaysMetrics();
             }
 
             private async Task ResizingWindow(ResizeArgs args)
