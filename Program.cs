@@ -78,12 +78,6 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.AddCascadingAuthenticationState();
 
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders =
-        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -91,7 +85,6 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseForwardedHeaders();
     app.UseHsts();
 }
 
@@ -99,7 +92,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
-app.UseForwardedHeaders();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+});
 
 app.UseStaticFiles();
 app.UseAntiforgery();
