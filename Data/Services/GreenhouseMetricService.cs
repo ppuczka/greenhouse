@@ -1,4 +1,5 @@
 using System.Linq.Dynamic.Core;
+using Greenhouse.Data.Extensions;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Microsoft.EntityFrameworkCore;
@@ -29,8 +30,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         var fromDate = DateTime.Now.AddDays(-7);
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var fromDateMetrics = context.GreenhouseMetrics
-            .Where(item => item.DateTime >= fromDate)
-            .Where(item => (item.DateTime.Hour == 9 || item.DateTime.Hour == 18) && item.DateTime.Minute == 30);
+            .Where(item => item.DateTime >= fromDate);
         return await fromDateMetrics.ToListAsync();
     }
 
