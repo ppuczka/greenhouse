@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
@@ -77,6 +78,12 @@ builder.Services.AddControllersWithViews(options =>
 
 builder.Services.AddCascadingAuthenticationState();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -84,19 +91,15 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseForwardedHeaders();
     app.UseHsts();
 }
-
-app.Use((context, next) =>
-{
-    context.Request.Scheme = "https";
-    return next(context);
-});
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseHttpsRedirection();
+app.UseForwardedHeaders();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
