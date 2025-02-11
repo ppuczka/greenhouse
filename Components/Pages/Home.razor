@@ -39,7 +39,8 @@
                                         <CircularGaugeAxes>
                                             <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="10" Maximum="40">
                                                 <CircularGaugeRanges>
-                                                    <CircularGaugeRange Start=17 End=25
+                                                    <CircularGaugeRange Start=17
+                                                                        End=25
                                                                         Color="Green"></CircularGaugeRange>
                                                     <CircularGaugeRange Start=0 End=17></CircularGaugeRange>
                                                     <CircularGaugeRange Start=25 End=40
@@ -144,7 +145,7 @@
                                 @if (IsInitialRender)
                                 {
                                     <SfCircularGauge ID="SoilMoisture"
-                                                     @ref="_humidity"
+                                                     @ref="_soilMoisture"
                                                      Title="Current Soil Moisture"
                                                      Background="transparent"
                                                      Height="150%"
@@ -159,7 +160,7 @@
                                                                         Color="Red"></CircularGaugeRange>
                                                 </CircularGaugeRanges>
                                                 <CircularGaugePointers>
-                                                    <CircularGaugePointer Value=20></CircularGaugePointer>
+                                                    <CircularGaugePointer Value=@_latestMetric.SoilMoisture></CircularGaugePointer>
                                                 </CircularGaugePointers>
                                             </CircularGaugeAxis>
                                         </CircularGaugeAxes>
@@ -207,6 +208,8 @@
 
             private SfCircularGauge? _temperature;
             private SfCircularGauge? _humidity;
+            private SfCircularGauge? _soilMoisture;
+            
             private GreenhouseMetric? _latestMetric;
             
             private List<MetricChartData>? _temperatureReport;
@@ -246,6 +249,7 @@
                 await Task.Yield();
                 if (_temperature != null) await _temperature.RefreshAsync();
                 if (_humidity != null) await _humidity.RefreshAsync();
+                if (_soilMoisture != null) await _soilMoisture.RefreshAsync();
             }
         }
     </Authorized>
