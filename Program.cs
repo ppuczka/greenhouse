@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.Identity;
 using Greenhouse.Components;
 using Greenhouse.Config;
@@ -6,6 +7,9 @@ using Greenhouse.Data.Extensions;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
 using Greenhouse.Data.Services;
+using Greenhouse.Storage.Interfaces;
+using Greenhouse.Storage.Providers;
+using Greenhouse.Storage.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -57,9 +61,12 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense
 // Add services to the container.
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+builder.Services.AddSingleton(azCredentials);
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddScoped<IGreenhouseMetricExtension, GreenhouseMetricExtensions>();
 builder.Services.AddScoped<IMetricChartDataService, MetricChartDataService>();
+builder.Services.AddScoped<IAzureBlobStorageProvider, AzureBlobStorageProvider>();
+builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 builder.Services.AddControllersWithViews();
 
 // Add Authentication 
