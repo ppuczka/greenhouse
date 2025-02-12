@@ -19,10 +19,11 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
 
     public async Task<GreenhouseMetric> GetLatestMetric()
     {
+        //Todo: Fix sorting - at this moment the records with comments are displayed first
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var sortedMetrics = context.GreenhouseMetrics.OrderByDescending(
             item => item.DateTime);
-        return await sortedMetrics.FirstAsync();
+        return  await sortedMetrics.FirstAsync();
     }
 
     public async Task<List<GreenhouseMetric>> GetLast7DaysMetrics()

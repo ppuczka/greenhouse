@@ -212,15 +212,18 @@ else
         await LoadMetrics();
     }
 
+    // Todo:  
     private void HandleInvalidCommentSubmit()
     {
         // Handle the invalid form submission here
     }
 
+    // Todo: implement deleting record
     public class FormModel
     {
         [Required(ErrorMessage = "Comment is required.")]
         public string TextInput { get; set; }
     }
-
+    
+    // Todo: implement export (xls, csv) 
 }
