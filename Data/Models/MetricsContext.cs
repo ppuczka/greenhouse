@@ -46,7 +46,12 @@ public class MetricsContext : DbContext
                 v => v.ToString(),
                 v => (TemperatureLevel)Enum.Parse(typeof(TemperatureLevel), v))
             .ToJsonProperty("temperature_level");
-
+        
+        modelBuilder.Entity<GreenhouseMetric>()
+            .Property(g => g.LightIntensity)
+            .ToJsonProperty("light_intensity")
+            .IsRequired(false);
+        
         modelBuilder.Entity<GreenhouseMetric>().Property(g => g.DateTime).ToJsonProperty("date_time");
 
         modelBuilder.Entity<GreenhouseMetric>().Property(g => g.Tags).ToJsonProperty("tags");

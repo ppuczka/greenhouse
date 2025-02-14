@@ -61,12 +61,18 @@ Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense
 // Add services to the container.
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
+
 builder.Services.AddSingleton(azCredentials);
+
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddScoped<IGreenhouseMetricExtension, GreenhouseMetricExtensions>();
 builder.Services.AddScoped<IMetricChartDataService, MetricChartDataService>();
 builder.Services.AddScoped<IAzureBlobStorageProvider, AzureBlobStorageProvider>();
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+
+// For continius monitoring of metrics and sending message if drops 
+// builder.Services.AddHostedService<MetricsMonitoringService>();
+
 builder.Services.AddControllersWithViews();
 
 // Add Authentication 
