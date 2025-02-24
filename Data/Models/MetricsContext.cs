@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 
 namespace Greenhouse.Data.Models;
 

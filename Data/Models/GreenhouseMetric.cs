@@ -6,11 +6,10 @@ namespace Greenhouse.Data.Models;
 public class GreenhouseMetric
 {
     public required string Id { get; set; }
-    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
     public int Temperature { get; set; }
     public int Humidity { get; set; }
     public int SoilMoisture { get; set; }
-    public int LightIntensity { get; set; } = -1;
+    public int? LightIntensity { get; set; }
     public HumidityLevel HumidityLevel { get; set; }
     public TemperatureLevel TemperatureLevel { get; set; }
     public SoilMoistureLevel SoilMoistureLevel { get; set; }

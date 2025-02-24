@@ -212,7 +212,8 @@
             private SfCircularGauge? _soilMoisture;
             
             private GreenhouseMetric? _latestMetric;
-            
+            private int _lightIntensityValue = -1;
+                
             private List<MetricChartData>? _temperatureReport;
             private List<MetricChartData>? _airHumidityReport;
             private List<MetricChartData>? _soilMoistureReport;
@@ -230,6 +231,11 @@
             protected override async Task OnInitializedAsync()
             {
                 _latestMetric = await GreenhouseMetricService.GetLatestMetric();
+                if (_latestMetric.LightIntensity != null)
+                {
+                    _lightIntensityValue = _latestMetric.LightIntensity ?? default(int);
+                }
+
                 _temperatureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Temperature);
                 _airHumidityReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Humidity);
                 _soilMoistureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.SoilMoisture);
