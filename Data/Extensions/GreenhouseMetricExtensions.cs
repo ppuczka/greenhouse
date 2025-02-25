@@ -7,16 +7,21 @@ namespace Greenhouse.Data.Extensions;
 
 public class GreenhouseMetricExtensions : IGreenhouseMetricExtension
 {
-    public List<MetricChartData> ToDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector)
+    public List<WeeklyMetricChartData> ToWeeklyDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector)
     {
         return metrics
             .GroupBy(m => m.DateTime.Date)
-            .Select(v => new MetricChartData
+            .Select(v => new WeeklyMetricChartData
             {
                 WeekDay = v.Key.DayOfWeek.ToString(),
                 Low = v.Min(selector),
                 High = v.Max(selector),
             })
             .ToList();
+    }
+
+    public List<DailyMetricChartData> ToDailyDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector)
+    {
+        throw new NotImplementedException();
     }
 }

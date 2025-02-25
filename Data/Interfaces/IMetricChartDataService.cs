@@ -4,5 +4,7 @@ namespace Greenhouse.Data.Interfaces;
 
 public interface IMetricChartDataService
 {
-    Task<List<MetricChartData>> GetHiLowDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector);
+    Task<List<WeeklyMetricChartData>> GetHiLowDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector);
+    
+    Task<List<WeeklyMetricChartData>> GetDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector);
 }

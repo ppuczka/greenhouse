@@ -8,9 +8,15 @@ public class MetricChartDataService(
     IGreenhouseMetricService greenhouseMetricService)
     : IMetricChartDataService
 {
-    public async Task<List<MetricChartData>> GetHiLowDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector)
+    public async Task<List<WeeklyMetricChartData>> GetHiLowDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector)
     {
-        var lastWeekMetrics = await greenhouseMetricService.GetLast7DaysMetrics();
-        return greenhouseMetricExtension.ToDataCharts(lastWeekMetrics, valueSelector);
+        var lastWeekMetrics = await greenhouseMetricService.GetLastDaysMetrics(7);
+        return greenhouseMetricExtension.ToWeeklyDataCharts(lastWeekMetrics, valueSelector);
+    }
+
+    public async Task<List<WeeklyMetricChartData>> GetDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector)
+    {
+        var lastDayMetrics = await greenhouseMetricService.GetLastDaysMetrics(1);
+        return greenhouseMetricExtension.ToWeeklyDataCharts(lastDayMetrics, valueSelector);
     }
 }

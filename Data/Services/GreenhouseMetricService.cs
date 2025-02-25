@@ -26,7 +26,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         return  await sortedMetrics.FirstAsync();
     }
 
-    public async Task<List<GreenhouseMetric>> GetLast7DaysMetrics()
+    public async Task<List<GreenhouseMetric>> GetLastDaysMetrics(int days)
     {
         var fromDate = DateTime.Now.AddDays(-7);
         await using var context = await dbContextFactory.CreateDbContextAsync();

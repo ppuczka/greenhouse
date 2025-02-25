@@ -4,5 +4,6 @@ namespace Greenhouse.Data.Interfaces;
 
 public interface IGreenhouseMetricExtension
 {
-    List<MetricChartData> ToDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector);
+    List<WeeklyMetricChartData> ToWeeklyDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector);
+    List<DailyMetricChartData> ToDailyDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector);
 }

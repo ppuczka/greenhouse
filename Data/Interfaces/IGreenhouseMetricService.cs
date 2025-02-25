@@ -6,7 +6,7 @@ public interface IGreenhouseMetricService
 {
     public Task<List<GreenhouseMetric>> GetGreenhouseMetrics();
     public Task<GreenhouseMetric> GetLatestMetric();
-    public Task<List<GreenhouseMetric>> GetLast7DaysMetrics();
+    public Task<List<GreenhouseMetric>> GetLastDaysMetrics(int days);
     public Task DeleteMetric(string metricId);
     public Task UpdateMetric(GreenhouseMetric greenhouseMetric);
     public Task AddComment(string metricId, string comment);
