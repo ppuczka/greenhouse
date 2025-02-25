@@ -9,7 +9,7 @@ public class GreenhouseMetric
     public int Temperature { get; set; }
     public int Humidity { get; set; }
     public int SoilMoisture { get; set; }
-    public int? LightIntensity { get; set; }
+    public int LightIntensity { get; set; }
     public HumidityLevel HumidityLevel { get; set; }
     public TemperatureLevel TemperatureLevel { get; set; }
     public SoilMoistureLevel SoilMoistureLevel { get; set; }

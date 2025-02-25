@@ -195,6 +195,62 @@
                                 </SfChart>
                             </ContentTemplate>
                         </DashboardLayoutPanel>
+                        <DashboardLayoutPanel Row=3>
+                            <ContentTemplate>
+                                @if (IsInitialRender)
+                                {
+                                    <SfCircularGauge ID="LightIntensity"
+                                                     @ref="_lightIntensity"
+                                                     Title="Current Light Intensity"
+                                                     Background="transparent"
+                                                     Height="150%"
+                                                     Width="100%">
+                                        <CircularGaugeAxes>
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="0" Maximum="1000">
+                                                <CircularGaugeRanges>
+                                                    <CircularGaugeRange Start=40 End=60
+                                                                        Color="Green"></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=60 End=90></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=20 End=40
+                                                                        Color="Red"></CircularGaugeRange>
+                                                </CircularGaugeRanges>
+                                                <CircularGaugePointers>
+                                                    <CircularGaugePointer Value=@_latestMetric.LightIntensity></CircularGaugePointer>
+                                                </CircularGaugePointers>
+                                            </CircularGaugeAxis>
+                                        </CircularGaugeAxes>
+                                    </SfCircularGauge>
+                                }
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
+
+                        <DashboardLayoutPanel SizeX=2 Column=2 Row="3">
+                            <ContentTemplate>
+                                <SfChart Title="Light Intensity Daily" Palettes="@_palettes">
+                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                    </ChartPrimaryXAxis>
+
+                                    <ChartSeriesCollection>
+                                        <ChartSeries DataSource="@_lightIntensityReport"
+                                                     XName="WeekDay"
+                                                     YName="High"
+                                                     Type="ChartSeriesType.Column">
+                                            <ChartMarker>
+                                                <ChartDataLabel Visible="true"/>
+                                            </ChartMarker>
+                                        </ChartSeries>
+                                        <ChartSeries DataSource="@_lightIntensityReport"
+                                                     XName="WeekDay"
+                                                     YName="Low"
+                                                     Type="ChartSeriesType.Column">
+                                            <ChartMarker>
+                                                <ChartDataLabel Visible="true"/>
+                                            </ChartMarker>
+                                        </ChartSeries>
+                                    </ChartSeriesCollection>
+                                </SfChart>
+                            </ContentTemplate>
+                        </DashboardLayoutPanel>
                     </DashboardLayoutPanels>
                 </SfDashboardLayout>
                 <p>Last updated: @_latestMetric.DateTime</p>
@@ -210,13 +266,14 @@
             private SfCircularGauge? _temperature;
             private SfCircularGauge? _humidity;
             private SfCircularGauge? _soilMoisture;
+            private SfCircularGauge? _lightIntensity;
             
             private GreenhouseMetric? _latestMetric;
-            private int _lightIntensityValue = -1;
                 
             private List<MetricChartData>? _temperatureReport;
             private List<MetricChartData>? _airHumidityReport;
             private List<MetricChartData>? _soilMoistureReport;
+            private List<MetricChartData>? _lightIntensityReport;
 
             private bool IsInitialRender { get; set; }
 
@@ -231,14 +288,11 @@
             protected override async Task OnInitializedAsync()
             {
                 _latestMetric = await GreenhouseMetricService.GetLatestMetric();
-                if (_latestMetric.LightIntensity != null)
-                {
-                    _lightIntensityValue = _latestMetric.LightIntensity ?? default(int);
-                }
-
+                
                 _temperatureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Temperature);
                 _airHumidityReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Humidity);
                 _soilMoistureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.SoilMoisture);
+                _lightIntensityReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.LightIntensity);
             }
 
             private async Task ResizingWindow(ResizeArgs args)
@@ -257,6 +311,7 @@
                 if (_temperature != null) await _temperature.RefreshAsync();
                 if (_humidity != null) await _humidity.RefreshAsync();
                 if (_soilMoisture != null) await _soilMoisture.RefreshAsync();
+                if (_lightIntensity != null) await _lightIntensity.RefreshAsync();
             }
         }
     </Authorized>
