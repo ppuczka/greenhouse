@@ -22,6 +22,12 @@ public class GreenhouseMetricExtensions : IGreenhouseMetricExtension
 
     public List<DailyMetricChartData> ToDailyDataCharts(List<GreenhouseMetric> metrics, Func<GreenhouseMetric, double> selector)
     {
-        throw new NotImplementedException();
+        return metrics
+            .GroupBy(m => m.DateTime.Hour)
+            .Select(v => new DailyMetricChartData
+            {
+                Hour = v.Key.ToString(),
+                Value = v.Average(selector)
+            }).ToList();
     }
 }

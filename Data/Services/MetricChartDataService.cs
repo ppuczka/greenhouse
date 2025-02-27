@@ -14,9 +14,9 @@ public class MetricChartDataService(
         return greenhouseMetricExtension.ToWeeklyDataCharts(lastWeekMetrics, valueSelector);
     }
 
-    public async Task<List<WeeklyMetricChartData>> GetDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector)
+    public async Task<List<DailyMetricChartData>> GetDailyMetricChartData(Func<GreenhouseMetric, double> valueSelector)
     {
         var lastDayMetrics = await greenhouseMetricService.GetLastDaysMetrics(1);
-        return greenhouseMetricExtension.ToWeeklyDataCharts(lastDayMetrics, valueSelector);
+        return greenhouseMetricExtension.ToDailyDataCharts(lastDayMetrics, valueSelector);
     }
 }

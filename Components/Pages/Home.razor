@@ -6,12 +6,16 @@
 @using Greenhouse.Data.Models
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Syncfusion.Blazor.Layouts
 @using Syncfusion.Blazor.CircularGauge
 @using Syncfusion.Blazor.Charts
 
 @inject IGreenhouseMetricService GreenhouseMetricService
 @inject IMetricChartDataService MetricChartDataService
+@inject IHttpContextAccessor HttpContextAccessor
+@inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage SessionStorage
 
 <PageTitle>Dashboard</PageTitle>
 <AuthorizeView>
@@ -23,6 +27,10 @@
         else
         {
             <div class="content">
+                <div class="switch" style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <SfSwitch @bind-Checked="_toggleMetricsTimeRangeWeekly" OnLabel="week" OffLabel="24h"
+                          ValueChange="ChangeTimeInterval" TChecked="bool"></SfSwitch>
+                </div>
                 <SfDashboardLayout CellSpacing="@(new double[] { 20, 20 })" Columns="3">
                     <DashboardLayoutEvents Created="Created" OnWindowResize="@ResizingWindow"
                                            Resizing="@ResizingWindow"></DashboardLayoutEvents>
@@ -58,30 +66,45 @@
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel SizeX=2 Column=2 Row="0">
                             <ContentTemplate>
-                                <SfChart Title="Temperature Weekly" Palettes="@_palettes">
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                    </ChartPrimaryXAxis>
+                                @if (_toggleMetricsTimeRangeWeekly)
+                                {
+                                    <SfChart Title="Temperature Weekly" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                        </ChartPrimaryXAxis>
 
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@_temperatureReport"
-                                                     High="30"
-                                                     XName="WeekDay"
-                                                     YName="High"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="@_temperatureReport"
-                                                     XName="WeekDay"
-                                                     YName="Low"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                </SfChart>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_temperatureWeeklyReport"
+                                                         High="30"
+                                                         XName="WeekDay"
+                                                         YName="High"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                            <ChartSeries DataSource="@_temperatureWeeklyReport"
+                                                         XName="WeekDay"
+                                                         YName="Low"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
+                                else
+                                {
+                                    <SfChart Title="Temperature Daily" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"/>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_temperatureDailyReport" XName="Hour"
+                                                         YName="Value"
+                                                         Type="ChartSeriesType.Line">
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel Row="1">
@@ -115,29 +138,44 @@
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel SizeX=2 Column=2 Row="1">
                             <ContentTemplate>
-                                <SfChart Title="Air Humidity Weekly" Palettes="@_palettes">
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                    </ChartPrimaryXAxis>
+                                @if (_toggleMetricsTimeRangeWeekly)
+                                {
+                                    <SfChart Title="Air Humidity Weekly" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                        </ChartPrimaryXAxis>
 
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@_airHumidityReport"
-                                                     XName="WeekDay"
-                                                     YName="High"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="@_airHumidityReport"
-                                                     XName="WeekDay"
-                                                     YName="Low"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                </SfChart>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_airHumidityWeeklyReport"
+                                                         XName="WeekDay"
+                                                         YName="High"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                            <ChartSeries DataSource="@_airHumidityWeeklyReport"
+                                                         XName="WeekDay"
+                                                         YName="Low"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
+                                else
+                                {
+                                    <SfChart Title="Air Humidity Daily" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"/>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_airHumidityDailyReport" XName="Hour"
+                                                         YName="Value"
+                                                         Type="ChartSeriesType.Line">
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel Row=2>
@@ -160,7 +198,8 @@
                                                                         Color="Red"></CircularGaugeRange>
                                                 </CircularGaugeRanges>
                                                 <CircularGaugePointers>
-                                                    <CircularGaugePointer Value=@_latestMetric.SoilMoisture></CircularGaugePointer>
+                                                    <CircularGaugePointer
+                                                        Value=@_latestMetric.SoilMoisture></CircularGaugePointer>
                                                 </CircularGaugePointers>
                                             </CircularGaugeAxis>
                                         </CircularGaugeAxes>
@@ -170,29 +209,44 @@
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel SizeX=2 Column=2 Row="2">
                             <ContentTemplate>
-                                <SfChart Title="Soil Moisture Weekly" Palettes="@_palettes">
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                    </ChartPrimaryXAxis>
+                                @if (_toggleMetricsTimeRangeWeekly)
+                                {
+                                    <SfChart Title="Soil Moisture Weekly" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                        </ChartPrimaryXAxis>
 
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@_soilMoistureReport"
-                                                     XName="WeekDay"
-                                                     YName="High"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="@_soilMoistureReport"
-                                                     XName="WeekDay"
-                                                     YName="Low"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                </SfChart>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_soilMoistureWeeklyReport"
+                                                         XName="WeekDay"
+                                                         YName="High"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                            <ChartSeries DataSource="@_soilMoistureWeeklyReport"
+                                                         XName="WeekDay"
+                                                         YName="Low"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
+                                else
+                                {
+                                    <SfChart Title="Soil Moisture Daily" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"/>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_soilMoistureDailyReport" XName="Hour"
+                                                         YName="Value"
+                                                         Type="ChartSeriesType.Line">
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                         <DashboardLayoutPanel Row=3>
@@ -206,16 +260,18 @@
                                                      Height="150%"
                                                      Width="100%">
                                         <CircularGaugeAxes>
-                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="0" Maximum="1000">
+                                            <CircularGaugeAxis StartAngle="270" EndAngle="90" Minimum="0"
+                                                               Maximum="1000">
                                                 <CircularGaugeRanges>
-                                                    <CircularGaugeRange Start=40 End=60
+                                                    <CircularGaugeRange Start=0 End=300
                                                                         Color="Green"></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=60 End=90></CircularGaugeRange>
-                                                    <CircularGaugeRange Start=20 End=40
+                                                    <CircularGaugeRange Start=300 End=700></CircularGaugeRange>
+                                                    <CircularGaugeRange Start=700 End=1000
                                                                         Color="Red"></CircularGaugeRange>
                                                 </CircularGaugeRanges>
                                                 <CircularGaugePointers>
-                                                    <CircularGaugePointer Value=@_latestMetric.LightIntensity></CircularGaugePointer>
+                                                    <CircularGaugePointer
+                                                        Value=@_latestMetric.LightIntensity></CircularGaugePointer>
                                                 </CircularGaugePointers>
                                             </CircularGaugeAxis>
                                         </CircularGaugeAxes>
@@ -226,29 +282,43 @@
 
                         <DashboardLayoutPanel SizeX=2 Column=2 Row="3">
                             <ContentTemplate>
-                                <SfChart Title="Light Intensity Daily" Palettes="@_palettes">
-                                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                    </ChartPrimaryXAxis>
-
-                                    <ChartSeriesCollection>
-                                        <ChartSeries DataSource="@_lightIntensityReport"
-                                                     XName="WeekDay"
-                                                     YName="High"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                        <ChartSeries DataSource="@_lightIntensityReport"
-                                                     XName="WeekDay"
-                                                     YName="Low"
-                                                     Type="ChartSeriesType.Column">
-                                            <ChartMarker>
-                                                <ChartDataLabel Visible="true"/>
-                                            </ChartMarker>
-                                        </ChartSeries>
-                                    </ChartSeriesCollection>
-                                </SfChart>
+                                @if (_toggleMetricsTimeRangeWeekly)
+                                {
+                                    <SfChart Title="Light Intensity Weekly" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                        </ChartPrimaryXAxis>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_lightIntensityWeeklyReport"
+                                                         XName="WeekDay"
+                                                         YName="High"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                            <ChartSeries DataSource="@_lightIntensityWeeklyReport"
+                                                         XName="WeekDay"
+                                                         YName="Low"
+                                                         Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
+                                else
+                                {
+                                    <SfChart Title="Light Intensity Daily" Palettes="@_palettes">
+                                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"/>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@_lightIntensityDailyReport" XName="Hour"
+                                                         YName="Value"
+                                                         Type="ChartSeriesType.Line">
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                    </SfChart>
+                                }
                             </ContentTemplate>
                         </DashboardLayoutPanel>
                     </DashboardLayoutPanels>
@@ -259,21 +329,33 @@
 
         @code
         
+        
+
+        
+
+
+
         {
 
             private readonly string[] _palettes = ["#F6B53F", "#6FAAB0"];
+            private bool _toggleMetricsTimeRangeWeekly;
 
             private SfCircularGauge? _temperature;
             private SfCircularGauge? _humidity;
             private SfCircularGauge? _soilMoisture;
             private SfCircularGauge? _lightIntensity;
-            
+
             private GreenhouseMetric? _latestMetric;
-                
-            private List<WeeklyMetricChartData>? _temperatureReport;
-            private List<WeeklyMetricChartData>? _airHumidityReport;
-            private List<WeeklyMetricChartData>? _soilMoistureReport;
-            private List<WeeklyMetricChartData>? _lightIntensityReport;
+
+            private List<WeeklyMetricChartData>? _temperatureWeeklyReport;
+            private List<WeeklyMetricChartData>? _airHumidityWeeklyReport;
+            private List<WeeklyMetricChartData>? _soilMoistureWeeklyReport;
+            private List<WeeklyMetricChartData>? _lightIntensityWeeklyReport;
+
+            private List<DailyMetricChartData>? _temperatureDailyReport;
+            private List<DailyMetricChartData>? _airHumidityDailyReport;
+            private List<DailyMetricChartData>? _soilMoistureDailyReport;
+            private List<DailyMetricChartData>? _lightIntensityDailyReport;
 
             private bool IsInitialRender { get; set; }
 
@@ -288,12 +370,27 @@
             protected override async Task OnInitializedAsync()
             {
                 _latestMetric = await GreenhouseMetricService.GetLatestMetric();
-                
-                _temperatureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Temperature);
-                _airHumidityReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Humidity);
-                _soilMoistureReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.SoilMoisture);
-                _lightIntensityReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.LightIntensity);
+
+                _temperatureWeeklyReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Temperature);
+                _airHumidityWeeklyReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.Humidity);
+                _soilMoistureWeeklyReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.SoilMoisture);
+                _lightIntensityWeeklyReport = await MetricChartDataService.GetHiLowDailyMetricChartData(g => g.LightIntensity);
+
+                _temperatureDailyReport = await MetricChartDataService.GetDailyMetricChartData(g => g.Temperature);
+                _airHumidityDailyReport = await MetricChartDataService.GetDailyMetricChartData(g => g.Humidity);
+                _soilMoistureDailyReport = await MetricChartDataService.GetDailyMetricChartData(g => g.SoilMoisture);
+                _lightIntensityDailyReport = await MetricChartDataService.GetDailyMetricChartData(g => g.LightIntensity);
             }
+
+            protected override async Task OnAfterRenderAsync(bool firstRender)
+            {
+                if (firstRender)
+                {
+                    var result = await SessionStorage.GetAsync<bool>("time_range_daily");
+                    _toggleMetricsTimeRangeWeekly = !result.Success || result.Value;
+                }
+            }
+
 
             private async Task ResizingWindow(ResizeArgs args)
             {
@@ -312,6 +409,16 @@
                 if (_humidity != null) await _humidity.RefreshAsync();
                 if (_soilMoisture != null) await _soilMoisture.RefreshAsync();
                 if (_lightIntensity != null) await _lightIntensity.RefreshAsync();
+            }
+
+            private void ChangeTimeInterval(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
+            {
+                SessionStorage.SetAsync("time_range_daily", args.Checked);
+            }
+
+            private void ReloadPage()
+            {
+                NavigationManager.NavigateTo("/", true);
             }
         }
     </Authorized>
