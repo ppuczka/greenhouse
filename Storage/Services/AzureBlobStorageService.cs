@@ -12,7 +12,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
         _azureBlobStorageProvider = azureBlobStorageProvider;
     }
 
-    public async Task UploadFile(string fileName, string content)
+    public async Task UploadFile(Stream content, string fileName)
     {
         await _azureBlobStorageProvider.UploadBlob(content, fileName);
     }

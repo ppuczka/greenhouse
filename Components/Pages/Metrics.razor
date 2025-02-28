@@ -4,6 +4,7 @@
 @using System.ComponentModel.DataAnnotations
 @using Greenhouse.Data.Interfaces
 @using Greenhouse.Data.Models
+@using Greenhouse.Storage.Interfaces
 @using Microsoft.AspNetCore.Authorization
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Navigations
@@ -13,6 +14,7 @@
 @rendermode InteractiveServer
 
 @inject IGreenhouseMetricService GreenhouseMetricService
+@inject IAzureBlobStorageService AzureBlobStorageService
 
 <PageTitle>Greenhouse Metrics</PageTitle>
 
@@ -58,6 +60,10 @@ else
                                         <TabHeader Text="Details"></TabHeader>
                                     </ChildContent>
                                     <ContentTemplate>
+                                        <SfUploader ID="UploadFiles">
+                                            <UploaderAsyncSettings SaveUrl="api/SampleData/Save" RemoveUrl="api/SampleData/Remove"></UploaderAsyncSettings>
+                                            @* <UploaderEvents OnFailure="@OnFailureHandler" OnActionComplete="@OnActionCompleteHandler"></UploaderEvents> *@
+                                        </SfUploader>
                                     </ContentTemplate>
                                 </TabItem>
                                 <TabItem>
@@ -169,7 +175,7 @@ else
 @code
 {
     private List<GreenhouseMetric>? _metricsList;
-    private readonly FormModel _formModel = new FormModel();
+    private readonly FormModel _formModel = new();
 
     protected override async Task OnInitializedAsync()
     {

@@ -11,11 +11,11 @@
 @using Syncfusion.Blazor.CircularGauge
 @using Syncfusion.Blazor.Charts
 
-@inject IGreenhouseMetricService GreenhouseMetricService
-@inject IMetricChartDataService MetricChartDataService
-@inject IHttpContextAccessor HttpContextAccessor
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage SessionStorage
+
+@inject IGreenhouseMetricService GreenhouseMetricService
+@inject IMetricChartDataService MetricChartDataService
 
 <PageTitle>Dashboard</PageTitle>
 <AuthorizeView>
@@ -328,13 +328,6 @@
         }
 
         @code
-        
-        
-
-        
-
-
-
         {
 
             private readonly string[] _palettes = ["#F6B53F", "#6FAAB0"];

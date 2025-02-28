@@ -17,14 +17,11 @@ public class AzureBlobStorageProvider: IAzureBlobStorageProvider
         _blobContainerClient = new BlobContainerClient(new Uri(containerEndpoint), azureCredentials);
     }
 
-    public async Task UploadBlob(string toBeUploaded, string blobName)
+    public async Task UploadBlob(Stream stream, string blobName)
     {
         try
         {
             await _blobContainerClient.CreateIfNotExistsAsync();
-            var byteArray = Encoding.ASCII.GetBytes(toBeUploaded);
-            
-            using var stream = new MemoryStream(byteArray);
             await _blobContainerClient.UploadBlobAsync(blobName, stream);
         }
         catch (RequestFailedException e)
