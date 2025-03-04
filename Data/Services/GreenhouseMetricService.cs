@@ -28,7 +28,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
 
     public async Task<List<GreenhouseMetric>> GetLastDaysMetrics(int days)
     {
-        var fromDate = DateTime.Now.AddDays(-7);
+        var fromDate = DateTime.Now.AddDays(-days);
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var fromDateMetrics = context.GreenhouseMetrics
             .Where(item => item.DateTime >= fromDate);
