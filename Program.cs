@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Syncfusion.Blazor;
@@ -39,7 +40,9 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     {
         throw new ApplicationException("Missing environment variable: APP_CONFIGURATION_ENDPOINT");
     }
+
     options.Connect(new Uri(endpoint), azCredentials);
+    options.ConfigureKeyVault(keyVaultOptions => { keyVaultOptions.SetCredential(new DefaultAzureCredential()); });
 });
 
 builder.Services.Configure<Config>(builder.Configuration.GetSection("Greenhouse:Config"));
@@ -51,7 +54,7 @@ builder.Services.AddDbContextFactory<MetricsContext>(options =>
         builder.Configuration.GetSection("Greenhouse:Config:DatabaseEndpoint").Value!,
         azCredentials,
         builder.Configuration.GetSection("Greenhouse:Config:DatabaseName").Value!
-        );
+    );
 });
 
 // Configure Syncfusion license
@@ -67,10 +70,14 @@ builder.Services.AddSingleton(azCredentials);
 builder.Services.AddScoped<IGreenhouseMetricService, GreenhouseMetricService>();
 builder.Services.AddScoped<IGreenhouseMetricExtension, GreenhouseMetricExtensions>();
 builder.Services.AddScoped<IMetricChartDataService, MetricChartDataService>();
-builder.Services.AddScoped<IAzureBlobStorageProvider, AzureBlobStorageProvider>();
+builder.Services.AddScoped<IAzureBlobStorageProvider>(provider =>
+{
+    var config = provider.GetService<IOptions<Config>>();
+    return new AzureBlobStorageProvider(config);
+});
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 
-// For continius monitoring of metrics and sending message if drops 
+// For continuous monitoring of metrics and sending message if drops 
 // builder.Services.AddHostedService<MetricsMonitoringService>();
 
 builder.Services.AddControllersWithViews();

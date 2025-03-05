@@ -1,21 +1,34 @@
 using System.Text;
 using Azure;
 using Azure.Identity;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Greenhouse.Storage.Interfaces;
 
 namespace Greenhouse.Storage.Providers;
 
-public class AzureBlobStorageProvider: IAzureBlobStorageProvider
+public class AzureBlobStorageProvider : IAzureBlobStorageProvider
 {
-    private readonly BlobServiceClient _blobServiceClient;
     private readonly BlobContainerClient _blobContainerClient;
-    public AzureBlobStorageProvider(Microsoft.Extensions.Options.IOptions<Config.Config> appConfig, DefaultAzureCredential azureCredentials)
+
+    public AzureBlobStorageProvider(Microsoft.Extensions.Options.IOptions<Config.Config> appConfig,
+        DefaultAzureCredential azureCredentials)
     {
-        var containerEndpoint = $"https://{appConfig.Value.AzureStorageAccountName}.blob.core.windows.net";
-        _blobServiceClient = new BlobServiceClient(new Uri(containerEndpoint), azureCredentials);
-        
-        _blobContainerClient = _blobServiceClient.GetBlobContainerClient(appConfig.Value.AzureBlobContainerName);
+        var containerEndpoint = new Uri($"https://{appConfig.Value.AzureStorageAccountName}.blob.core.windows.net");
+
+        var blobServiceClient = new BlobServiceClient(containerEndpoint, azureCredentials);
+        _blobContainerClient = blobServiceClient.GetBlobContainerClient(appConfig.Value.AzureBlobContainerName);
+    }
+
+    public AzureBlobStorageProvider(Microsoft.Extensions.Options.IOptions<Config.Config> appConfig)
+    {
+        // At this moment connecting using System / User MI not working hence using Shared Keys
+        var storageCredentials = new StorageSharedKeyCredential(appConfig.Value.AzureStorageAccountName,
+            appConfig.Value.AzureStorageAccountKey);
+        var containerEndpoint = new Uri($"https://{appConfig.Value.AzureStorageAccountName}.blob.core.windows.net");
+
+        var blobServiceClient = new BlobServiceClient(containerEndpoint, storageCredentials);
+        _blobContainerClient = blobServiceClient.GetBlobContainerClient(appConfig.Value.AzureBlobContainerName);
     }
 
     public async Task UploadBlob(Stream stream, string blobName)
@@ -23,14 +36,15 @@ public class AzureBlobStorageProvider: IAzureBlobStorageProvider
         stream.Position = 0;
         try
         {
-            // await _blobServiceClient.CreateBlobContainerAsync(blobName);
-           var response = await _blobContainerClient.UploadBlobAsync(blobName, stream);
+            var blobClient = _blobContainerClient.GetBlobClient(blobName);
+            var response = await blobClient.UploadAsync(stream, true);
         }
         catch (RequestFailedException e)
         {
             Console.WriteLine(e);
             throw;
         }
+
         stream.Close();
     }
 }
