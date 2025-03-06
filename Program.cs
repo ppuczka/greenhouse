@@ -42,7 +42,7 @@ builder.Configuration.AddAzureAppConfiguration(options =>
     }
 
     options.Connect(new Uri(endpoint), azCredentials);
-    options.ConfigureKeyVault(keyVaultOptions => { keyVaultOptions.SetCredential(new DefaultAzureCredential()); });
+    options.ConfigureKeyVault(keyVaultOptions => { keyVaultOptions.SetCredential(azCredentials); });
 });
 
 builder.Services.Configure<Config>(builder.Configuration.GetSection("Greenhouse:Config"));
