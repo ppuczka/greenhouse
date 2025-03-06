@@ -59,5 +59,16 @@ public class MetricsContext : DbContext
                 comment.Property(p => p.Comment).ToJsonProperty("comment");
                 comment.Property(p => p.Created).ToJsonProperty("created");
             });
+
+        modelBuilder.Entity<GreenhouseMetric>().OwnsMany(
+            o => o.Attachments,
+            attachment =>
+            {
+                attachment.ToJsonProperty("attachments");
+                attachment.Property(p => p.FileName).ToJsonProperty("filename");
+                attachment.Property(p => p.FileSize).ToJsonProperty("size");
+                attachment.Property(p => p.BlobUri).ToJsonProperty("blob_uri");
+                attachment.Property(p => p.UploadedOn).ToJsonProperty("uploaded_on");
+            });
     }
 }

@@ -15,6 +15,7 @@ public class GreenhouseMetric
     public SoilMoistureLevel SoilMoistureLevel { get; set; }
     public IList<String>? Tags { get; set; }
     public ICollection<MetricComment>? Comments { get; set; }
+    public ICollection<AttachmentMetadata>? Attachments { get; set; }
     public DateTime DateTime { get; set; }
     [NotMapped]
     public bool IsExpanded { get; set; }
