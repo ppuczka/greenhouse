@@ -78,7 +78,6 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
             Console.WriteLine(e);
             throw;
         }
-        
     }
 
     public async Task AddTag(string metricId, string tag)
@@ -99,5 +98,10 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    public Task AddAttatchment(AttachmentMetadata attatchmentMetadata)
+    {
+        throw new NotImplementedException();
     }
 }

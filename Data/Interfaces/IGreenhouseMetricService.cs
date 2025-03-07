@@ -11,4 +11,5 @@ public interface IGreenhouseMetricService
     public Task UpdateMetric(GreenhouseMetric greenhouseMetric);
     public Task AddComment(string metricId, string comment);
     public Task AddTag(string metricId, string tag);
+    public Task AddAttatchment(AttachmentMetadata attatchmentMetadata);
 }
