@@ -61,11 +61,7 @@ else
                                         </ChildContent>
                                         <ContentTemplate>
                                             <SfUploader AutoUpload="true">
-                                                <UploaderFiles>
-                                                    <UploaderUploadedFiles Name="Nature" Size=500000 Type=".png"></UploaderUploadedFiles>
-                                                    <UploaderUploadedFiles Name="Nature" Size=500000 Type=".png"></UploaderUploadedFiles>
-                                                </UploaderFiles>
-                                                <UploaderEvents ValueChange="@OnChange"></UploaderEvents>
+                                                <UploaderEvents ValueChange="@(args => OnAttachmentUpload(metric.Id, args))" ></UploaderEvents>
                                             </SfUploader>
                                         </ContentTemplate>
                                     </TabItem>
@@ -234,7 +230,7 @@ else
         public string TextInput { get; set; }
     }
 
-    private async Task OnChange(UploadChangeEventArgs args)
+    private async Task OnAttachmentUpload(string metricId, UploadChangeEventArgs args)
     {
         try
         {
@@ -243,7 +239,7 @@ else
                 var path = @"" + file.FileInfo.Name;
                 var filestream = new FileStream(path, FileMode.Create, FileAccess.ReadWrite);
                 await file.File.OpenReadStream(long.MaxValue).CopyToAsync(filestream);
-                await AzureBlobStorageService.UploadFile(filestream, path);
+                await AzureBlobStorageService.UploadFile(metricId, filestream, path);
             }
         }
         catch (Exception ex)

@@ -1,4 +1,5 @@
 using System.Linq.Dynamic.Core;
+using System.Net.Mail;
 using Greenhouse.Data.Extensions;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
@@ -100,8 +101,23 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         }
     }
 
-    public Task AddAttatchment(AttachmentMetadata attatchmentMetadata)
+    public async Task AddAttachment(string metricId, AttachmentMetadata attachmentMetadata)
     {
-        throw new NotImplementedException();
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        try
+        {
+            var metric = await context.GreenhouseMetrics.FindAsync(metricId);
+            if (metric != null)
+            {
+                metric.Attachments ??= new List<AttachmentMetadata>();
+                metric.Attachments.Add(attachmentMetadata);
+                await context.SaveChangesAsync();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 }

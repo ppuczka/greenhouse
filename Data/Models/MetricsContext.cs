@@ -66,7 +66,6 @@ public class MetricsContext : DbContext
             {
                 attachment.ToJsonProperty("attachments");
                 attachment.Property(p => p.FileName).ToJsonProperty("filename");
-                attachment.Property(p => p.FileSize).ToJsonProperty("size");
                 attachment.Property(p => p.BlobUri).ToJsonProperty("blob_uri");
                 attachment.Property(p => p.UploadedOn).ToJsonProperty("uploaded_on");
             });
