@@ -60,8 +60,31 @@ else
                                             <TabHeader Text="Attachments"></TabHeader>
                                         </ChildContent>
                                         <ContentTemplate>
+                                            @if (metric?.Attachments != null && metric.Attachments.Any())
+                                            {
+                                                <div style="padding:25px">
+                                                    <ul>
+                                                        @foreach (var attachment in @metric.Attachments)
+                                                        {
+                                                            <li class="comment">
+                                                                <div class="comment-header">
+                                                                    <span class="comment-date"><a href="@attachment.BlobUri">@attachment.FileName</a></span>
+                                                                </div>
+                                                                <div class="comment-body">
+                                                                    <span class="comment-text">@attachment.UploadedOn</span>
+                                                                </div>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div style="padding:25px">No comments added yet</div>
+                                            }
+                                            
                                             <SfUploader AutoUpload="true">
-                                                <UploaderEvents ValueChange="@(args => OnAttachmentUpload(metric.Id, args))" ></UploaderEvents>
+                                                <UploaderEvents ValueChange="@(args => OnAttachmentUpload(metric.Id, args))"></UploaderEvents>
                                             </SfUploader>
                                         </ContentTemplate>
                                     </TabItem>
