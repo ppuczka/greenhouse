@@ -24,7 +24,7 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var sortedMetrics = context.GreenhouseMetrics.OrderByDescending(
             item => item.DateTime);
-        return  await sortedMetrics.FirstAsync();
+        return await sortedMetrics.FirstAsync();
     }
 
     public async Task<List<GreenhouseMetric>> GetLastDaysMetrics(int days)
@@ -64,7 +64,6 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
     {
         var comment = new MetricComment(commentText);
         await using var context = await dbContextFactory.CreateDbContextAsync();
-
         try
         {
             var metric = await context.GreenhouseMetrics.FindAsync(metricId);
@@ -104,20 +103,25 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
     public async Task AddAttachment(string metricId, AttachmentMetadata attachmentMetadata)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-        try
+        var metric = await context.GreenhouseMetrics.FindAsync(metricId);
+        if (metric != null)
         {
-            var metric = await context.GreenhouseMetrics.FindAsync(metricId);
-            if (metric != null)
+            try
             {
                 metric.Attachments ??= new List<AttachmentMetadata>();
                 metric.Attachments.Add(attachmentMetadata);
                 await context.SaveChangesAsync();
             }
+
+            catch (Exception e)
+            {
+                Console.WriteLine("DEBUG exception" + e);
+                throw;
+            }
         }
-        catch (Exception e)
+        else
         {
-            Console.WriteLine(e);
-            throw;
+            throw new NullReferenceException();
         }
     }
 }

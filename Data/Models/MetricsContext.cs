@@ -13,7 +13,7 @@ public class MetricsContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultContainer("greenhouse");
-        modelBuilder.Entity<GreenhouseMetric>().HasNoDiscriminator();
+        modelBuilder.Entity<GreenhouseMetric>().HasNoDiscriminator().HasPartitionKey(g => g.Id);
         modelBuilder.Entity<GreenhouseMetric>().Property(g => g.Id).ToJsonProperty("id");
         modelBuilder.Entity<GreenhouseMetric>().Property(g => g.Humidity).ToJsonProperty("humidity");
 

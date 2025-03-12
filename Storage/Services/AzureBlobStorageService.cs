@@ -4,19 +4,14 @@ using Greenhouse.Storage.Providers;
 
 namespace Greenhouse.Storage.Services;
 
-public class AzureBlobStorageService : IAzureBlobStorageService
+public class AzureBlobStorageService(
+    IAzureBlobStorageProvider azureBlobStorageProvider,
+    IGreenhouseMetricService greenhouseMetricService)
+    : IAzureBlobStorageService
 {
-    private readonly IAzureBlobStorageProvider _azureBlobStorageProvider;
-    private readonly IGreenhouseMetricService _greenhouseMetricService;
-
-    public AzureBlobStorageService(IAzureBlobStorageProvider azureBlobStorageProvider)
-    {
-        _azureBlobStorageProvider = azureBlobStorageProvider;
-    }
-
     public async Task UploadFile(string metricId, Stream content, string fileName)
     {
-        var attachmentMetadata = await _azureBlobStorageProvider.UploadBlob(content, fileName);
-        await _greenhouseMetricService.AddAttachment(metricId, attachmentMetadata);
+        var attachmentMetadata = await azureBlobStorageProvider.UploadBlob(content, fileName);
+        await greenhouseMetricService.AddAttachment(metricId, attachmentMetadata);
     }
 }

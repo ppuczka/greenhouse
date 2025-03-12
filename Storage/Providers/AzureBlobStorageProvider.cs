@@ -46,7 +46,7 @@ public class AzureBlobStorageProvider : IAzureBlobStorageProvider
         }
         catch (RequestFailedException e)
         {
-            Console.WriteLine(e);
+            Console.WriteLine("DEBUG upload" + e);
             throw;
         }
     }
