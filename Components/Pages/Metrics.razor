@@ -68,10 +68,29 @@ else
                                                         {
                                                             <li class="comment">
                                                                 <div class="comment-header">
-                                                                    <span class="comment-date"><a href="@attachment.BlobUri">@attachment.FileName</a></span>
+                                                                    <span class="comment-date"><a
+                                                                            href="@attachment.BlobUri">@attachment.FileName</a></span>
                                                                 </div>
-                                                                <div class="comment-body">
+
+                                                                <div class="comment-container"
+                                                                     style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-bottom: 1px solid #ccc; margin-bottom: 15px; padding-bottom: 10px;">
                                                                     <span class="comment-text">@attachment.UploadedOn</span>
+                                                                    
+                                                                    <div class="button-container"
+                                                                         style="display: flex; gap: 10px;">
+                                                                        <SfButton CssClass="e-round e-success"
+                                                                                  IconCss="e-icons e-download"
+                                                                                  IsPrimary="true"
+                                                                                  @onclick="() => OnAttachmentDownload(metric, attachment.FileName)">
+                                                                                      
+                                                                        </SfButton>
+
+                                                                        <SfButton CssClass="e-round e-danger"
+                                                                                  IconCss="e-icons e-close"
+                                                                                  IsPrimary="true"
+                                                                                  @onclick="() => OnAttachmentDelete(metric, attachment.FileName)">
+                                                                        </SfButton>
+                                                                    </div>
                                                                 </div>
                                                             </li>
                                                         }
@@ -80,11 +99,12 @@ else
                                             }
                                             else
                                             {
-                                                <div style="padding:25px">No comments added yet</div>
+                                                <div style="padding:25px">No attachments added yet</div>
                                             }
-                                            
+
                                             <SfUploader AutoUpload="true">
-                                                <UploaderEvents ValueChange="@(args => OnAttachmentUpload(metric.Id, args))"></UploaderEvents>
+                                                <UploaderEvents
+                                                    ValueChange="@(args => OnAttachmentUpload(metric.Id, args))"></UploaderEvents>
                                             </SfUploader>
                                         </ContentTemplate>
                                     </TabItem>
@@ -196,6 +216,20 @@ else
 
 @code
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {
     private List<GreenhouseMetric>? _metricsList;
     private readonly FormModel _formModel = new();
@@ -269,6 +303,19 @@ else
         {
             Console.WriteLine(ex.Message);
         }
+        await LoadMetrics();
+    }
+
+    private Task OnAttachmentDownload(GreenhouseMetric metric, string fileName)
+    {
+        throw new NotImplementedException();
+    }
+
+    private async Task OnAttachmentDelete(GreenhouseMetric metric, string fileName)
+    {
+        await AzureBlobStorageService.DeleteFile(metric.Id, fileName);
+        // Todo: try to reload one particural row of metric 
+        await LoadMetrics();
     }
 }
 

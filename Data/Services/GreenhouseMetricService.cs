@@ -124,4 +124,32 @@ public class GreenhouseMetricService(IDbContextFactory<MetricsContext> dbContext
             throw new NullReferenceException();
         }
     }
+
+    public async Task DeleteAttachment(string metricId, string fileName)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        var metric = await context.GreenhouseMetrics.FindAsync(metricId);
+        if (metric != null)
+        {
+            try
+            {
+                metric.Attachments ??= new List<AttachmentMetadata>();
+                var attachment = metric.Attachments.FirstOrDefault(a => a.FileName == fileName);
+                if (attachment != null)
+                {
+                    metric.Attachments.Remove(attachment);
+                    await context.SaveChangesAsync();
+                }
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine("DEBUG exception" + e);
+                throw;
+            }
+        }
+        else
+        {
+            throw new NullReferenceException();
+        }    }
 }

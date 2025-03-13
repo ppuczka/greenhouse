@@ -12,4 +12,5 @@ public interface IGreenhouseMetricService
     public Task AddComment(string metricId, string comment);
     public Task AddTag(string metricId, string tag);
     public Task AddAttachment(string metricId, AttachmentMetadata attachmentMetadata);
+    public Task DeleteAttachment(string metricId, string fileName);
 }

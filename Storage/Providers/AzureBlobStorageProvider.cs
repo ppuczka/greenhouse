@@ -50,4 +50,32 @@ public class AzureBlobStorageProvider : IAzureBlobStorageProvider
             throw;
         }
     }
+
+    public async Task DownloadBlob(string blobName)
+    {
+        try
+        {
+            var blobClient = _blobContainerClient.GetBlobClient(blobName);
+            var response = await blobClient.DownloadAsync(); 
+        }
+        catch (RequestFailedException e)
+        {
+            Console.WriteLine("DEBUG download" + e);
+            throw;
+        }
+    }
+
+    public async Task DeleteBlob(string blobName)
+    {
+        try
+        {
+            var blobClient = _blobContainerClient.GetBlobClient(blobName);
+            await blobClient.DeleteAsync();
+        }
+        catch (RequestFailedException e)
+        {
+            Console.WriteLine("DEBUG delete" + e);
+            throw;
+        }
+    }
 }
