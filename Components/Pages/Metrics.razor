@@ -30,11 +30,12 @@ else
 {
     <AuthorizeView Context="authContext">
         <Authorized>
-            <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true"
+            <SfGrid @ref="Grid" DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true"
                     AllowSelection="true"
                     CssClass="full-page-grid"
                     ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Delete", "CsvExport", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
                 <GridPageSettings PageSize="20"></GridPageSettings>
+                <GridEvents OnActionBegin="ActionBeginHandler" TValue="GreenhouseMetric"></GridEvents>
                 <GridColumns>
                     <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date"
                                 Format="dd/MM/yyyy HH:mm:ss"></GridColumn>
@@ -215,22 +216,8 @@ else
 }
 
 @code
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 {
+    SfGrid<GreenhouseMetric> Grid;
     private List<GreenhouseMetric>? _metricsList;
     private readonly FormModel _formModel = new();
 
@@ -264,7 +251,7 @@ else
     {
         await GreenhouseMetricService.AddComment(metricId, _formModel.TextInput);
         _formModel.TextInput = string.Empty;
-        await LoadMetrics();
+        // await LoadMetrics();
     }
 
     private async Task HandleValidTagSubmit(string metricId)
@@ -315,7 +302,17 @@ else
     {
         await AzureBlobStorageService.DeleteFile(metric.Id, fileName);
         // Todo: try to reload one particural row of metric 
-        await LoadMetrics();
+        // await LoadMetrics();
+    }
+
+    private async Task ActionBeginHandler(ActionEventArgs<GreenhouseMetric> args)
+    {
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Save && args.Action == "Edit")
+        {
+            args.Cancel = true;    
+            await Grid.CloseEdit();    
+            await Grid.SetRowData(args.Data.Id, args.Data);
+        }    
     }
 }
 
