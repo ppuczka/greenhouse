@@ -15,9 +15,9 @@ public class AzureBlobStorageService(
         await greenhouseMetricService.AddAttachment(metricId, attachmentMetadata);
     }
 
-    public Task DownloadFile(string blobName)
+    public async Task<Stream> DownloadFile(string blobName)
     {
-        throw new NotImplementedException();
+        return await azureBlobStorageProvider.DownloadBlob(blobName);
     }
     
     public async Task DeleteFile(string metricId, string blobName)

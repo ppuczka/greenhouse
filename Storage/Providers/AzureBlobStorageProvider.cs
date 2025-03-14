@@ -51,12 +51,13 @@ public class AzureBlobStorageProvider : IAzureBlobStorageProvider
         }
     }
 
-    public async Task DownloadBlob(string blobName)
+    public async Task<Stream> DownloadBlob(string blobName)
     {
         try
         {
             var blobClient = _blobContainerClient.GetBlobClient(blobName);
             var response = await blobClient.DownloadAsync(); 
+            return response.Value.Content;
         }
         catch (RequestFailedException e)
         {
