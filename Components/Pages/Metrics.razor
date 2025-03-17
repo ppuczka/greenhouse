@@ -296,11 +296,9 @@ else
     private async Task OnAttachmentDownload(GreenhouseMetric metric, string fileName)
     {
         var downloadStream = await AzureBlobStorageService.DownloadFile(fileName);
-        using var fileStream = new MemoryStream();
-        await downloadStream.CopyToAsync(fileStream);
-        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        using var streamRef = new DotNetStreamReference(stream: downloadStream);
         
-        await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, fileName);
+        await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
 
     private async Task OnAttachmentDelete(GreenhouseMetric metric, string fileName)
