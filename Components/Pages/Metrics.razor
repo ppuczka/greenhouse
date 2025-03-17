@@ -16,7 +16,7 @@
 @inject IGreenhouseMetricService GreenhouseMetricService
 @inject IAzureBlobStorageService AzureBlobStorageService
 
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime JsRuntime
 
 <PageTitle>Greenhouse Metrics</PageTitle>
 
@@ -296,14 +296,11 @@ else
     private async Task OnAttachmentDownload(GreenhouseMetric metric, string fileName)
     {
         var downloadStream = await AzureBlobStorageService.DownloadFile(fileName);
-        using var memoryStream = new MemoryStream();
-        await downloadStream.CopyToAsync(memoryStream);
-        var fileBytes = memoryStream.ToArray();
-
-        var base64 = Convert.ToBase64String(fileBytes);
-        var fileUrl = $"data:application/octet-stream;base64,{base64}";
-
-        await JSRuntime.InvokeVoidAsync("downloadFile", fileUrl, fileName);
+        using var fileStream = new MemoryStream();
+        await downloadStream.CopyToAsync(fileStream);
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+        
+        await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, fileName);
     }
 
     private async Task OnAttachmentDelete(GreenhouseMetric metric, string fileName)
