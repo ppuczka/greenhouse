@@ -32,10 +32,11 @@ else
 {
     <AuthorizeView Context="authContext">
         <Authorized>
-            <SfGrid DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true"
+            <SfGrid @ref="Grid" DataSource="@_metricsList" AllowSorting="true" AllowPaging="true" AllowGrouping="true"
                     AllowSelection="true"
                     CssClass="full-page-grid"
-                    ContextMenuItems="@(new List<object>() { "AutoFit", "AutoFitAll", "SortAscending", "SortDescending", "Delete", "CsvExport", "FirstPage", "PrevPage", "LastPage", "NextPage" })">
+                    ContextMenuItems="@(new List<ContextMenuItemModel>() { new ContextMenuItemModel { Text = "Remove from database", Target = ".e-content", Id = "test" } })">
+                <GridEvents ContextMenuItemClicked="OnContextMenuRemoveFromDbClick" TValue="GreenhouseMetric"></GridEvents>
                 <GridPageSettings PageSize="20"></GridPageSettings>
                 <GridColumns>
                     <GridColumn Field=@nameof(GreenhouseMetric.DateTime) HeaderText="Date Time" Type="ColumnType.Date"
@@ -76,15 +77,16 @@ else
 
                                                                 <div class="comment-container"
                                                                      style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; border-bottom: 1px solid #ccc; margin-bottom: 15px; padding-bottom: 10px;">
-                                                                    <span class="comment-text">@attachment.UploadedOn</span>
-                                                                    
+                                                                    <span
+                                                                        class="comment-text">@attachment.UploadedOn</span>
+
                                                                     <div class="button-container"
                                                                          style="display: flex; gap: 10px;">
                                                                         <SfButton CssClass="e-round e-success"
                                                                                   IconCss="e-icons e-download"
                                                                                   IsPrimary="true"
                                                                                   @onclick="() => OnAttachmentDownload(metric, attachment.FileName)">
-                                                                                      
+
                                                                         </SfButton>
 
                                                                         <SfButton CssClass="e-round e-danger"
@@ -217,9 +219,19 @@ else
 }
 
 @code
+
 {
     private List<GreenhouseMetric>? _metricsList;
+
+    private SfGrid<GreenhouseMetric> Grid;
+
     private readonly FormModel _formModel = new();
+
+    public class FormModel
+    {
+        [Required(ErrorMessage = "Comment is required.")]
+        public string TextInput { get; set; }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -264,14 +276,9 @@ else
     // Todo:  
     private void HandleInvalidCommentSubmit()
     {
-        // Handle the invalid form submission here
-    }
-
-    // Todo: implement deleting record
-    public class FormModel
-    {
-        [Required(ErrorMessage = "Comment is required.")]
-        public string TextInput { get; set; }
+        if (_formModel.TextInput.Length > 1000)
+        {
+        }
     }
 
     private async Task OnAttachmentUpload(string metricId, UploadChangeEventArgs args)
@@ -290,6 +297,7 @@ else
         {
             Console.WriteLine(ex.Message);
         }
+
         await LoadMetrics();
     }
 
@@ -297,13 +305,19 @@ else
     {
         var downloadStream = await AzureBlobStorageService.DownloadFile(fileName);
         using var streamRef = new DotNetStreamReference(stream: downloadStream);
-        
+
         await JsRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
 
     private async Task OnAttachmentDelete(GreenhouseMetric metric, string fileName)
     {
         await AzureBlobStorageService.DeleteFile(metric.Id, fileName);
+        await LoadMetrics();
+    }
+
+    private async Task OnContextMenuRemoveFromDbClick(ContextMenuClickEventArgs<GreenhouseMetric> arg)
+    {
+        await GreenhouseMetricService.DeleteMetric(arg.Item.Id);
         await LoadMetrics();
     }
 }
