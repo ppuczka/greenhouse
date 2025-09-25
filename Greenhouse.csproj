@@ -9,22 +9,23 @@
   </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Azure.Identity" Version="1.13.1" />
-      <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
-      <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0" />
-      <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.46.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.0" />
-      <PackageReference Include="Microsoft.Identity.Web" Version="3.6.2" />
-      <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.6.2" />
-      <PackageReference Include="Radzen.Blazor" Version="5.7.4" />
-      <PackageReference Include="Syncfusion.Blazor.Buttons" Version="28.1.41" />
-      <PackageReference Include="Syncfusion.Blazor.Calendars" Version="28.1.41" />
-      <PackageReference Include="Syncfusion.Blazor.Cards" Version="28.1.41" />
-      <PackageReference Include="Syncfusion.Blazor.Charts" Version="28.2.4" />
-      <PackageReference Include="Syncfusion.Blazor.CircularGauge" Version="28.2.4" />
-      <PackageReference Include="Syncfusion.Blazor.Grid" Version="28.1.41" />
-      <PackageReference Include="Syncfusion.Blazor.Layouts" Version="28.2.4" />
-      <PackageReference Include="Syncfusion.Blazor.Themes" Version="28.2.4" />
+      <PackageReference Include="Azure.Identity" Version="1.16.0" />
+      <PackageReference Include="Azure.ResourceManager.IotHub" Version="1.1.1" />
+      <PackageReference Include="Azure.Storage.Blobs" Version="12.25.1" />
+      <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.4.0" />
+      <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.53.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="9.0.9" />
+      <PackageReference Include="Microsoft.Identity.Web" Version="3.14.1" />
+      <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.14.1" />
+      <PackageReference Include="Radzen.Blazor" Version="7.4.1" />
+      <PackageReference Include="Syncfusion.Blazor.Buttons" Version="31.1.21" />
+      <PackageReference Include="Syncfusion.Blazor.Calendars" Version="31.1.21" />
+      <PackageReference Include="Syncfusion.Blazor.Cards" Version="31.1.21" />
+      <PackageReference Include="Syncfusion.Blazor.Charts" Version="31.1.21" />
+      <PackageReference Include="Syncfusion.Blazor.CircularGauge" Version="31.1.21" />
+      <PackageReference Include="Syncfusion.Blazor.Grid" Version="31.1.21" />
+      <PackageReference Include="Syncfusion.Blazor.Layouts" Version="31.1.21" />
+      <PackageReference Include="Syncfusion.Blazor.Themes" Version="31.1.21" />
     </ItemGroup>
 
 </Project>

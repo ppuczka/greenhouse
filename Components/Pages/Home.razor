@@ -22,7 +22,9 @@
     <Authorized>
         @if (_latestMetric == null)
         {
-            <p><em>Loading...</em></p>
+            <div class="spinner-container">
+                <div class="spinner"></div>
+            </div>
         }
         else
         {
@@ -32,8 +34,7 @@
                           ValueChange="ChangeTimeInterval" TChecked="bool"></SfSwitch>
                 </div>
                 <SfDashboardLayout CellSpacing="@(new double[] { 20, 20 })" Columns="3">
-                    <DashboardLayoutEvents Created="Created" OnWindowResize="@ResizingWindow"
-                                           Resizing="@ResizingWindow"></DashboardLayoutEvents>
+                    <DashboardLayoutEvents Created="Created" OnWindowResize="@ResizingWindow"></DashboardLayoutEvents>
                     <DashboardLayoutPanels>
                         <DashboardLayoutPanel Row="0">
                             <ContentTemplate>
@@ -404,7 +405,7 @@
                 if (_lightIntensity != null) await _lightIntensity.RefreshAsync();
             }
 
-            private void ChangeTimeInterval(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
+            private void ChangeTimeInterval(ChangeEventArgs<bool> args)
             {
                 SessionStorage.SetAsync("time_range_daily", args.Checked);
             }

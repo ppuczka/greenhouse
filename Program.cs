@@ -1,8 +1,6 @@
-using Azure.Core;
 using Azure.Identity;
 using Greenhouse.Components;
 using Greenhouse.Config;
-using Greenhouse.Data;
 using Greenhouse.Data.Extensions;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
@@ -21,6 +19,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Syncfusion.Blazor;
+using Syncfusion.Licensing;
+
+// Todo: Add logging https://learn.microsoft.com/en-us/azure/azure-app-configuration/howto-integrate-logging?tabs=core3x
 
 // Get Azure credentials
 var userAssignedClientId = Environment.GetEnvironmentVariable("CLIENT_ID");
@@ -59,7 +60,7 @@ builder.Services.AddDbContextFactory<MetricsContext>(options =>
 
 // Configure Syncfusion license
 var syncfusionLicense = builder.Configuration.GetSection("Greenhouse:Config:SyncfusionLicense").Value!;
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense);
+SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense);
 
 // Add services to the container.
 builder.Services.AddSyncfusionBlazor();

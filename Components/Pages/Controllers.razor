@@ -1,0 +1,32 @@
+﻿@page "/controllers"
+@using Greenhouse.Data.Interfaces
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@inject NavigationManager NavigationManager
+@inject ProtectedSessionStorage SessionStorage
+
+@inject IGreenhouseMetricService GreenhouseMetricService
+@inject IMetricChartDataService MetricChartDataService
+
+<PageTitle>Controllers</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        @if (true)
+        {
+            <div class="spinner-container">
+                <div class="spinner"></div>
+            </div>
+        }
+        else
+        {
+            <p><em>Content</em></p>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <p><em>You are not authorized to view this page. Please login first...</em></p>
+    </NotAuthorized>
+</AuthorizeView>
