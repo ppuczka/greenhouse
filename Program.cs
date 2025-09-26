@@ -33,6 +33,10 @@ var azCredentials = new DefaultAzureCredential(
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Get Application config
 builder.Configuration.AddAzureAppConfiguration(options =>
 {

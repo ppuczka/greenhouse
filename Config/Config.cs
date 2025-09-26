@@ -12,4 +12,6 @@ public class Config
     public string? AzureStorageAccountKey { get; set; }
     public string? OidcLogoutEndpoint { get; set; }
     public string? OidcLogoutRedirectUri { get; set; }
+    
+    public List<string>? IotHubDeviceConnectionStrings{ get; set; }
 }
