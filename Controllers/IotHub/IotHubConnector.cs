@@ -1,4 +1,5 @@
 using Greenhouse.Controllers.IotHub.Interfaces;
+using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Azure.Devices.Client;
 using Microsoft.Azure.Devices.Client.Exceptions;
 using Microsoft.Azure.Devices.Shared;
@@ -13,6 +14,7 @@ public class IotHubConnector : IIotHubConnector
     private static readonly TimeSpan RandomDelay = TimeSpan.FromSeconds(15);
 
     private static readonly SemaphoreSlim InitSemaphore = new(1, 1);
+
     private static readonly ClientOptions ClientOptions = new() { SdkAssignsMessageId = SdkAssignsMessageId.WhenUnset };
 
     private static readonly HashSet<Type> ExceptionsToBeRetried = new()
@@ -21,10 +23,8 @@ public class IotHubConnector : IIotHubConnector
         typeof(UnauthorizedAccessException)
     };
 
-    private static volatile DeviceClient DeviceClient;
-    private static volatile ConnectionStatus ConnectionStatus;
-
-    // private static CancellationTokenSource AppCancellation;
+    private static volatile DeviceClient? _deviceClient;
+    private static volatile ConnectionStatus _connectionStatus;
 
     private static long _localDesiredPropertyVersion = 1;
 
@@ -37,7 +37,10 @@ public class IotHubConnector : IIotHubConnector
 
     private readonly ILogger<IotHubConnector> _logger;
 
+    private static CancellationTokenSource? _appCancellation;
 
+    private static bool IsDeviceConnected => _connectionStatus == ConnectionStatus.Connected;
+    
     public IotHubConnector(
         IOptions<Config.Config> appConfig,
         TransportType transportType,
@@ -60,44 +63,46 @@ public class IotHubConnector : IIotHubConnector
         _transportType = transportType;
         _logger.LogInformation("Using {s} transport.", _transportType);
     }
-
-
-    public async Task ConnectAsync(CancellationToken cancellationToken)
+    
+    bool IIotHubConnector.IsDeviceConnected() => IsDeviceConnected;
+    
+    public async Task ConnectAsync(CancellationToken parentCancellationToken)
     {
-        if (ShouldClientBeInitialized(ConnectionStatus))
+        _appCancellation = CancellationTokenSource.CreateLinkedTokenSource(parentCancellationToken);
+        if (ShouldClientBeInitialized(_connectionStatus))
         {
             // Allow a single thread to dispose and initialize the client instance.
-            await InitSemaphore.WaitAsync(cancellationToken);
+            await InitSemaphore.WaitAsync(_appCancellation.Token);
             try
             {
-                if (ShouldClientBeInitialized(ConnectionStatus))
+                if (ShouldClientBeInitialized(_connectionStatus))
                 {
                     _logger.LogDebug("Attempting to initialize the client instance, current status={s}",
-                        ConnectionStatus);
+                        _connectionStatus);
 
                     // If the device client instance has been previously initialized, close and dispose it.
-                    if (DeviceClient != null)
+                    if (_deviceClient != null)
                     {
                         try
                         {
-                            await DeviceClient.CloseAsync(cancellationToken);
+                            await _deviceClient.CloseAsync(_appCancellation.Token);
                         }
                         catch (UnauthorizedException)
                         {
                         } // If the previous token is now invalid, this call may fail
 
-                        DeviceClient.Dispose();
+                        _deviceClient.Dispose();
                     }
 
-                    DeviceClient = DeviceClient.CreateFromConnectionString(_deviceConnectionStrings.First(),
+                    _deviceClient = DeviceClient.CreateFromConnectionString(_deviceConnectionStrings.First(),
                         _transportType, ClientOptions);
-                    DeviceClient.SetConnectionStatusChangesHandler(ConnectionStatusChangeHandlerAsync);
-                    DeviceClient.SetRetryPolicy(_retryPolicy);
+                    _deviceClient.SetConnectionStatusChangesHandler(ConnectionStatusChangeHandlerAsync);
+                    _deviceClient.SetRetryPolicy(_retryPolicy);
                     _logger.LogDebug("Initialized the client instance.");
 
                     // Force connection now.
                     // OpenAsync() is an idempotent call, it has the same effect if called once or multiple times on the same client.
-                    await DeviceClient.OpenAsync(cancellationToken);
+                    await _deviceClient.OpenAsync(_appCancellation.Token);
                     _logger.LogDebug($"The client instance has been opened.");
                 }
             }
@@ -107,12 +112,56 @@ public class IotHubConnector : IIotHubConnector
             }
 
             // You will need to subscribe to the client callbacks any time the client is initialized.
-            await DeviceClient?.SetDesiredPropertyUpdateCallbackAsync(HandleTwinUpdateNotificationsAsync, null,
-                cancellationToken);
+            await _deviceClient?.SetDesiredPropertyUpdateCallbackAsync(
+                HandleTwinUpdateNotificationsAsync,
+                null,
+                parentCancellationToken);
             _logger.LogDebug("The client has subscribed to desired property update notifications.");
         }
     }
 
+    public async Task CloseConnectionAsync(CancellationToken cancellationToken)
+    {
+        if (_deviceClient != null)
+        {
+            try
+            {
+                await _deviceClient.CloseAsync(cancellationToken);
+            }
+            catch (UnauthorizedException)
+            {
+            } // If the previous token is now invalid, this call may fail
+
+            await _deviceClient.DisposeAsync();
+            _deviceClient = null;
+            _connectionStatus = ConnectionStatus.Disabled;
+
+            InitSemaphore.Dispose();
+            _appCancellation!.Dispose();
+        }
+    }
+
+    public Task SendMessageAsync(Message message, CancellationToken cancellationToken)
+    {
+        if (!IsDeviceConnected)
+        {
+            throw new InvalidOperationException("The device client is not connected. Cannot send message.");
+        }
+
+        try
+        {
+            _deviceClient!.SendEventAsync(message, cancellationToken);
+        }
+        catch (OperationCanceledException) { } 
+
+        catch (Exception ex)
+        {
+            _logger.LogError("Unrecoverable exception caught, user action is required, so exiting: \n{Exception}", ex);
+            _appCancellation!.Cancel();
+        }
+        
+        return Task.CompletedTask;
+    }
 
     // It is not generally a good practice to have async void methods, however, DeviceClient.ConnectionStatusChangeHandlerAsync() event handler signature
     // has a void return type. As a result, any operation within this block will be executed unmonitored on another thread.
@@ -120,9 +169,12 @@ public class IotHubConnector : IIotHubConnector
     // initialize or dispose the device client instance; the async method GetTwinAndDetectChangesAsync is implemented similarly for the same purpose
     private async void ConnectionStatusChangeHandlerAsync(ConnectionStatus status, ConnectionStatusChangeReason reason)
     {
-        _logger.LogDebug("Connection status changed: status={Status}, reason={ConnectionStatusChangeReason}", status,
-            reason);
-        ConnectionStatus = status;
+        _logger.LogDebug(
+            "Connection status changed: status={Status}, reason={ConnectionStatusChangeReason}",
+            status,
+            reason
+        );
+        _connectionStatus = status;
 
         switch (status)
         {
@@ -136,7 +188,7 @@ public class IotHubConnector : IIotHubConnector
                 // work on a device (e.g., get twin) when it comes online. If all the devices go offline and then come online at the same time (for example,
                 // during a servicing event) it could introduce increased latency or even throttling responses.
                 // For more information, see https://docs.microsoft.com/azure/iot-hub/iot-hub-devguide-quotas-throttling#traffic-shaping.
-                await GetTwinAndDetectChangesAsync(AppCancellation.Token);
+                await GetTwinAndDetectChangesAsync(_appCancellation!.Token);
                 _logger.LogDebug(
                     "The client has retrieved twin values after the connection status changes into CONNECTED.");
                 break;
@@ -164,7 +216,7 @@ public class IotHubConnector : IIotHubConnector
 
                             try
                             {
-                                await ConnectAsync(AppCancellation.Token);
+                                await ConnectAsync(_appCancellation!.Token);
                             }
                             catch (OperationCanceledException)
                             {
@@ -175,14 +227,14 @@ public class IotHubConnector : IIotHubConnector
 
                         _logger.LogWarning(
                             "### The supplied credentials are invalid. Update the parameters and run again.");
-                        AppCancellation.Cancel();
+                        await _appCancellation!.CancelAsync();
                         break;
 
                     case ConnectionStatusChangeReason.Device_Disabled:
                         _logger.LogWarning(
                             "### The device has been deleted or marked as disabled (on your hub instance)." +
                             "\nFix the device status in Azure and then create a new device client instance.");
-                        AppCancellation.Cancel();
+                        await _appCancellation!.CancelAsync();
                         break;
 
                     case ConnectionStatusChangeReason.Retry_Expired:
@@ -192,7 +244,7 @@ public class IotHubConnector : IIotHubConnector
 
                         try
                         {
-                            await ConnectAsync(AppCancellation.Token);
+                            await ConnectAsync(_appCancellation!.Token);
                         }
                         catch (OperationCanceledException)
                         {
@@ -207,7 +259,7 @@ public class IotHubConnector : IIotHubConnector
 
                         try
                         {
-                            await ConnectAsync(AppCancellation.Token);
+                            await ConnectAsync(_appCancellation!.Token);
                         }
                         catch (OperationCanceledException)
                         {
@@ -234,7 +286,7 @@ public class IotHubConnector : IIotHubConnector
     private async Task GetTwinAndDetectChangesAsync(CancellationToken cancellationToken)
     {
         // For the following call, we execute with a retry strategy with incrementally increasing delays between retry.
-        var twin = await DeviceClient.GetTwinAsync(cancellationToken);
+        var twin = await _deviceClient.GetTwinAsync(cancellationToken);
 
         _logger.LogInformation("Device retrieving twin values: {ToJson}", twin.ToJson());
 
@@ -268,22 +320,23 @@ public class IotHubConnector : IIotHubConnector
         }
 
         _localDesiredPropertyVersion = twinUpdateRequest.Version;
-        _logger.LogDebug("The desired property version on local is currently {LocalDesiredPropertyVersion}.", _localDesiredPropertyVersion);
+        _logger.LogDebug("The desired property version on local is currently {LocalDesiredPropertyVersion}.",
+            _localDesiredPropertyVersion);
 
         try
         {
             // For the purpose of this sample, we'll blindly accept all twin property write requests.
-            await DeviceClient.UpdateReportedPropertiesAsync(reportedProperties, AppCancellation.Token);
+            await _deviceClient!.UpdateReportedPropertiesAsync(reportedProperties, _appCancellation!.Token);
         }
         catch (OperationCanceledException)
         {
             // Fail gracefully on sample exit.
         }
     }
-    
+
     private bool ShouldClientBeInitialized(ConnectionStatus connectionStatus)
     {
-        return (connectionStatus == ConnectionStatus.Disconnected || connectionStatus == ConnectionStatus.Disabled)
+        return connectionStatus is ConnectionStatus.Disconnected or ConnectionStatus.Disabled
                && _deviceConnectionStrings.Any();
     }
 }
