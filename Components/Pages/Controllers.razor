@@ -1,4 +1,5 @@
 ﻿@page "/controllers"
+@using Greenhouse.Controllers.IotHub.Interfaces
 @using Greenhouse.Data.Interfaces
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
@@ -9,24 +10,65 @@
 @inject NavigationManager NavigationManager
 @inject ProtectedSessionStorage SessionStorage
 
-@inject IGreenhouseMetricService GreenhouseMetricService
-@inject IMetricChartDataService MetricChartDataService
+@inject IIotHubServiceClient IotHubServiceClient
 
 <PageTitle>Controllers</PageTitle>
 <AuthorizeView>
-    <Authorized>
-        @if (true)
+    <Authorized Context="authContext">
+        <h3>Controllers</h3>
+
+        <p>This page allows you to view and manage the IoT controllers connected to your greenhouse system.</p>
+        
+        <EditForm Model="this" OnValidSubmit="SendMessageAsync">
+            <InputText @bind-Value="MessageText" placeholder="Enter message..." class="form-control" />
+            <button type="submit" class="btn btn-primary mt-2" disabled="@IsSending">Send Message</button>
+            <button type="button" class="btn btn-secondary mt-2 ms-2" @onclick="CancelSending" disabled="@(!IsSending)">Cancel</button>
+        </EditForm>
+        @if (!string.IsNullOrEmpty(StatusMessage))
         {
-            <div class="spinner-container">
-                <div class="spinner"></div>
-            </div>
-        }
-        else
-        {
-            <p><em>Content</em></p>
+            <div class="mt-2">@StatusMessage</div>
         }
     </Authorized>
     <NotAuthorized>
         <p><em>You are not authorized to view this page. Please login first...</em></p>
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+    private string MessageText { get; set; } = string.Empty;
+    private string? StatusMessage;
+    private CancellationTokenSource? MessageCts;
+    private bool IsSending { get; set; } = false;
+
+    private async Task SendMessageAsync()
+    {
+        StatusMessage = string.Empty;
+        IsSending = true;
+        MessageCts = new CancellationTokenSource();
+        try
+        {
+            await IotHubServiceClient.SendCloud2DeviceMessageWithFeedbackAsync(MessageText, MessageCts.Token);
+            StatusMessage = "Message sent successfully.";
+            MessageText = string.Empty;
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = "Message sending cancelled.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Error sending message: {ex.Message}";
+        }
+        finally
+        {
+            IsSending = false;
+            MessageCts?.Dispose();
+            MessageCts = null;
+        }
+    }
+
+    private void CancelSending()
+    {
+        MessageCts?.Cancel();
+    }
+}

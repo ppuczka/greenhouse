@@ -1,6 +1,8 @@
 using Azure.Identity;
 using Greenhouse.Components;
 using Greenhouse.Config;
+using Greenhouse.Controllers.IotHub;
+using Greenhouse.Controllers.IotHub.Interfaces;
 using Greenhouse.Data.Extensions;
 using Greenhouse.Data.Interfaces;
 using Greenhouse.Data.Models;
@@ -82,6 +84,7 @@ builder.Services.AddScoped<IAzureBlobStorageProvider>(provider =>
 });
 builder.Services.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
 
+builder.Services.AddScoped<IIotHubServiceClient, IotHubServiceClient>();
 // For continuous monitoring of metrics and sending message if drops 
 // builder.Services.AddHostedService<MetricsMonitoringService>();
 

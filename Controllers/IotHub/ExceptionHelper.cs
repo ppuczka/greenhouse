@@ -28,7 +28,7 @@ internal class ExceptionHelper
         return Unwind(exceptionChain, true).Any(e => IsNetwork(e) && !IsTlsSecurity(e));
     }
 
-    private static bool IsNetwork(Exception singleException)
+    public static bool IsNetwork(Exception singleException)
     {
         return NetworkExceptions.Any(baseExceptionType => baseExceptionType.IsInstanceOfType(singleException));
     }

@@ -1,3 +1,5 @@
+using Microsoft.Azure.Devices;
+
 namespace Greenhouse.Config;
 
 public class Config
@@ -12,6 +14,8 @@ public class Config
     public string? AzureStorageAccountKey { get; set; }
     public string? OidcLogoutEndpoint { get; set; }
     public string? OidcLogoutRedirectUri { get; set; }
+    public string? IotHubDeviceConnectionString{ get; set; }
+    public string? IotHubDeviceId { get; set; }
+    public TransportType IotHubTransportType { get; set; }
     
-    public List<string>? IotHubDeviceConnectionStrings{ get; set; }
 }
