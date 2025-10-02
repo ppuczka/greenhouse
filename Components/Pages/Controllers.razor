@@ -1,4 +1,5 @@
 ﻿@page "/controllers"
+@using Azure.Messaging.EventHubs
 @using Greenhouse.Controllers.IotHub.Interfaces
 @using Greenhouse.Data.Interfaces
 @using Microsoft.AspNetCore.Authorization
@@ -18,16 +19,44 @@
         <h3>Controllers</h3>
 
         <p>This page allows you to view and manage the IoT controllers connected to your greenhouse system.</p>
-        
+
         <EditForm Model="this" OnValidSubmit="SendMessageAsync">
-            <InputText @bind-Value="MessageText" placeholder="Enter message..." class="form-control" />
+            <InputText @bind-Value="MessageText" placeholder="Enter message..." class="form-control"/>
             <button type="submit" class="btn btn-primary mt-2" disabled="@IsSending">Send Message</button>
-            <button type="button" class="btn btn-secondary mt-2 ms-2" @onclick="CancelSending" disabled="@(!IsSending)">Cancel</button>
+            <button type="button" class="btn btn-secondary mt-2 ms-2" @onclick="CancelSending" disabled="@(!IsSending)">
+                Cancel
+            </button>
         </EditForm>
         @if (!string.IsNullOrEmpty(StatusMessage))
         {
             <div class="mt-2">@StatusMessage</div>
         }
+        <hr/>
+        <h4>Device Events</h4>
+        <button class="btn btn-primary mb-2" @onclick="StartListening" disabled="@IsListening">Start Listening</button>
+        <button class="btn btn-secondary mb-2 ms-2" @onclick="StopListening" disabled="@(!IsListening)">Stop Listening
+        </button>
+        @if (IsListening)
+        {
+            <p>Listening for device events...</p>
+        }
+        @if (Events.Count == 0)
+        {
+            <p>No events received yet.</p>
+        }
+        else
+        {
+            <div
+                style="background: #222; color: #eee; padding: 1em; border-radius: 6px; font-family: monospace; max-height: 300px; overflow-y: auto;">
+                @foreach (var evt in Events)
+                {
+                    <pre style="margin-bottom: 0.5em; white-space: pre-wrap; word-break: break-word;">
+                        @evt.Stringify()
+                    </pre>
+                }
+            </div>
+        }
+        <hr/>
     </Authorized>
     <NotAuthorized>
         <p><em>You are not authorized to view this page. Please login first...</em></p>
@@ -39,6 +68,45 @@
     private string? StatusMessage;
     private CancellationTokenSource? MessageCts;
     private bool IsSending { get; set; } = false;
+
+    // Device event logic
+    private List<Greenhouse.Controllers.IotHub.Models.IotHubEvent> Events { get; set; } = new();
+    private CancellationTokenSource? ListeningCts;
+    private bool IsListening { get; set; } = false;
+
+    private async Task StartListening()
+    {
+        if (IsListening)
+            return;
+        IsListening = true;
+        ListeningCts = new CancellationTokenSource();
+        Events.Clear();
+        StateHasChanged();
+        try
+        {
+            await foreach (var evt in IotHubServiceClient.ReceiveMessageFromDeviceAsync().WithCancellation(ListeningCts.Token))
+            {
+                Events.Insert(0, evt); // newest first
+                if (Events.Count > 50) // limit list size
+                    Events.RemoveAt(Events.Count - 1);
+                StateHasChanged();
+                if (!IsListening) break;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+        }
+        finally
+        {
+            IsListening = false;
+        }
+    }
+
+    private void StopListening()
+    {
+        ListeningCts?.Cancel();
+        IsListening = false;
+    }
 
     private async Task SendMessageAsync()
     {
@@ -71,4 +139,5 @@
     {
         MessageCts?.Cancel();
     }
+
 }

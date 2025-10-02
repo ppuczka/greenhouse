@@ -15,7 +15,9 @@ public class Config
     public string? OidcLogoutEndpoint { get; set; }
     public string? OidcLogoutRedirectUri { get; set; }
     public string? IotHubDeviceConnectionString{ get; set; }
+    public string? IotHubEventHubConnectionString{ get; set; }
     public string? IotHubDeviceId { get; set; }
+    public string? IotHubEventHubName { get; set; }
     public TransportType IotHubTransportType { get; set; }
     
 }

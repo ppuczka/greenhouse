@@ -1,5 +1,7 @@
 using System.Text;
+using Azure.Messaging.EventHubs.Consumer;
 using Greenhouse.Controllers.IotHub.Interfaces;
+using Greenhouse.Controllers.IotHub.Models;
 using Microsoft.Azure.Devices;
 using Microsoft.Azure.Devices.Shared;
 using Microsoft.Extensions.Options;
@@ -14,9 +16,14 @@ public class IotHubServiceClient : IIotHubServiceClient
     private static readonly SemaphoreSlim InitSemaphore = new(1, 1);
 
     private static ServiceClient? _serviceClient;
+    private static EventHubConsumerClient? _eventHubConsumerClient;
+
     private readonly TransportType _transportType;
 
     private readonly string _hubConnectionString;
+    private readonly string _eventHubConnectionString;
+    private readonly string _eventHubName;
+
     private readonly string _deviceId;
 
     private readonly ILogger<IotHubServiceClient> _logger;
@@ -26,10 +33,16 @@ public class IotHubServiceClient : IIotHubServiceClient
         _hubConnectionString = appConfig.Value.IotHubDeviceConnectionString ??
                                throw new ArgumentNullException(nameof(appConfig.Value.IotHubDeviceConnectionString));
 
+        _eventHubConnectionString = appConfig.Value.IotHubEventHubConnectionString ??
+                                    throw new ArgumentNullException(
+                                        nameof(appConfig.Value.IotHubEventHubConnectionString));
+
         _transportType = appConfig.Value.IotHubTransportType;
 
         _deviceId = appConfig.Value.IotHubDeviceId ??
                     throw new ArgumentNullException(nameof(appConfig.Value.IotHubDeviceId));
+        _eventHubName = appConfig.Value.IotHubEventHubName ??
+                        throw new ArgumentNullException(nameof(appConfig.Value.IotHubEventHubName));
 
         _logger = logger;
     }
@@ -39,21 +52,49 @@ public class IotHubServiceClient : IIotHubServiceClient
         try
         {
             await EnsureServiceClientInitializedAsync();
-            var sendTask =  SendC2DMessageAsync(messageText, cancellationToken);
-            var feedbackTask =  ReceiveMessageFeedbacksAsync(cancellationToken);
-            
+            var sendTask = SendC2DMessageAsync(messageText, cancellationToken);
+            var feedbackTask = ReceiveMessageFeedbacksAsync(cancellationToken);
+
             await Task.WhenAll(sendTask, feedbackTask);
         }
         catch (Exception ex)
         {
-            _logger.LogError("Unrecoverable exception caught, user action is required, so exiting...: \n{Exception}", ex);
+            _logger.LogError("Unrecoverable exception caught, user action is required, so exiting...: \n{Exception}",
+                ex);
             throw;
         }
     }
-    
-    public Task<string> ReceiveMessageAsync()
+
+    public async IAsyncEnumerable<IotHubEvent> ReceiveMessageFromDeviceAsync()
     {
-        throw new NotImplementedException();
+        await EnsureEventHubConsumerClientInitializedAsync();
+        await foreach (var partitionEvent in _eventHubConsumerClient!.ReadEventsAsync())
+        {
+            IotHubEvent? iotHubEvent = null;
+            try
+            {
+                var eventBody = Encoding.UTF8.GetString(partitionEvent.Data.Body.ToArray());
+                _logger.LogInformation("Received event: {EventBody}", eventBody);
+
+                var systemProperties = partitionEvent.Data.SystemProperties;
+                var dataProperties = partitionEvent.Data.Properties;
+
+                iotHubEvent = new IotHubEvent(
+                    eventBody,
+                    new Dictionary<string, object>(dataProperties),
+                    new Dictionary<string, object>(systemProperties)
+                );
+            }
+            catch (TaskCanceledException ex)
+            {
+                  // This is expected when the token is signaled; it should not be considered an error in this scenario.
+            }
+
+            if (iotHubEvent != null)
+            {
+                yield return iotHubEvent;
+            }
+        }
     }
 
     private async Task SendC2DMessageAsync(string messageText, CancellationToken cancellationToken)
@@ -95,7 +136,7 @@ public class IotHubServiceClient : IIotHubServiceClient
             }
         }
     }
-    
+
     private async Task ReceiveMessageFeedbacksAsync(CancellationToken token)
     {
         _logger.LogInformation("Starting to listen to feedback messages");
@@ -112,7 +153,7 @@ public class IotHubServiceClient : IIotHubServiceClient
                     _logger.LogInformation("New Feedback received:");
                     _logger.LogInformation("Enqueue Time: {FeedbackMessagesEnqueuedTime}",
                         feedbackMessages.EnqueuedTime);
-                    _logger.LogInformation("tNumber of messages in the batch: {Count}",
+                    _logger.LogInformation("Number of messages in the batch: {Count}",
                         feedbackMessages.Records.Count());
                     foreach (var feedbackRecord in feedbackMessages.Records)
                     {
@@ -155,6 +196,31 @@ public class IotHubServiceClient : IIotHubServiceClient
                     _serviceClient =
                         ServiceClient.CreateFromConnectionString(_hubConnectionString, _transportType, options);
                     _logger.LogInformation("Initialized a new service client instance.");
+                }
+            }
+            finally
+            {
+                InitSemaphore.Release();
+            }
+        }
+    }
+
+    private async Task EnsureEventHubConsumerClientInitializedAsync()
+    {
+        if (_eventHubConsumerClient == null)
+        {
+            await InitSemaphore.WaitAsync();
+            try
+            {
+                if (_eventHubConsumerClient == null)
+                {
+                    _eventHubConsumerClient = new EventHubConsumerClient(
+                        EventHubConsumerClient.DefaultConsumerGroupName,
+                        _eventHubConnectionString,
+                        _eventHubName
+                    );
+
+                    _logger.LogInformation("Initialized a new Event Hub consumer client instance.");
                 }
             }
             finally
